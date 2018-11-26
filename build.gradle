@@ -1,5 +1,7 @@
 plugins {
     id 'java'
+    id 'idea'
+    id 'application'
 }
 
 group 'de.esolutions.testing'
@@ -7,7 +9,6 @@ version '0.1'
 
 sourceCompatibility = 1.8
 
-apply plugin: 'application'
 mainClassName = 'de.eso.rxplayer.vertx.Launcher'
 
 repositories {
@@ -22,4 +23,11 @@ dependencies {
     implementation 'yuriykulikov.rxplayer:entertainment-lib:1.0.1'
     implementation 'io.vertx:vertx-core:3.5.0'
     implementation 'io.vertx:vertx-web-client:3.5.0'
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
 }
