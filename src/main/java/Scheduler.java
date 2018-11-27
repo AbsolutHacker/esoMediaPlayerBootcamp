@@ -1,5 +1,3 @@
-package players.resources;
-
 
 import io.reactivex.schedulers.Schedulers;
 

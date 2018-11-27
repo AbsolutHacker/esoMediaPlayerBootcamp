@@ -1,4 +1,4 @@
-package players.resources;
+package audio;
 
 import de.eso.rxplayer.Audio;
 
