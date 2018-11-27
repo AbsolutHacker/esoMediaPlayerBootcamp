@@ -16,15 +16,23 @@ repositories {
         url "https://dl.bintray.com/yuriykulikov/rxplayer"
     }
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    testCompile "org.mockito:mockito-core:2.+"
     implementation 'yuriykulikov.rxplayer:entertainment-lib:1.0.1'
     implementation 'yuriykulikov.rxplayer:entertainment-lib:1.0.1:sources'
     implementation 'yuriykulikov.rxplayer:entertainment-lib:1.0.1:javadoc'
     implementation 'io.vertx:vertx-core:3.5.0'
     implementation 'io.vertx:vertx-web-client:3.5.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.1.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.1.1'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 idea {
