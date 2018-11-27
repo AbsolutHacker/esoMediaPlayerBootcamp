@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class SpeakerAudioSinkImplTest {
 
@@ -42,7 +43,10 @@ class SpeakerAudioSinkImplTest {
         speakers.setState(Audio.AudioState.STARTING);
         speakers.setState(Audio.AudioState.STARTED);
 
+        when(speakers.getConnection()).thenReturn(Audio.Connection.RADIO);
+
         verify(speakers).setState(Audio.AudioState.STARTING);
         verify(speakers).setState(Audio.AudioState.STARTED);
+        assertEquals(Audio.Connection.RADIO, speakers.getConnection());
     }
 }
