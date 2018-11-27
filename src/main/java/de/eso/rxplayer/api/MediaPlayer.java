@@ -10,10 +10,10 @@ public interface MediaPlayer {
   void next();
   void previous();
   void selectSource(Audio.Connection source);
-  // {USB,CD}Player playing
-  void selectTrack(int track);
+  // selects an item (e.g. a given track, file, or station)
+  // depending on the active source
+  void selectItem(int index);
 
   long getPlaytimeOffset();
   int getCurrentTrack();
 }
-
