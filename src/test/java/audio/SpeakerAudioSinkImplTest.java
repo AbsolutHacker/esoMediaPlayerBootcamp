@@ -4,6 +4,8 @@ import de.eso.rxplayer.Audio;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 class SpeakerAudioSinkImplTest {
 
@@ -31,5 +33,16 @@ class SpeakerAudioSinkImplTest {
 
         speakers.setState(Audio.AudioState.STARTING);
         assertEquals(Audio.AudioState.STARTING, speakers.getState());
+    }
+
+    @Test
+    void setMoreState() {
+        AudioSink speakers = mock(AudioSink.class);
+
+        speakers.setState(Audio.AudioState.STARTING);
+        speakers.setState(Audio.AudioState.STARTED);
+
+        verify(speakers).setState(Audio.AudioState.STARTING);
+        verify(speakers).setState(Audio.AudioState.STARTED);
     }
 }
