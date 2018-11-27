@@ -3,7 +3,6 @@ package de.eso.rxplayer.vertx;
 import de.eso.rxplayer.Audio;
 import de.eso.rxplayer.Entertainment;
 import de.eso.rxplayer.EntertainmentService;
-import io.reactivex.Completable;
 import io.reactivex.schedulers.Schedulers;
 
 public class Launcher {

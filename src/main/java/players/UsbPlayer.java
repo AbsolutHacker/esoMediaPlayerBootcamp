@@ -1,10 +1,6 @@
 package players;
 
-import de.eso.rxplayer.Audio;
-import de.eso.rxplayer.Browser;
-import de.eso.rxplayer.EntertainmentService;
-import de.eso.rxplayer.Player;
-import io.reactivex.schedulers.Schedulers;
+import de.eso.rxplayer.*;
 
 public class UsbPlayer {
 
@@ -15,7 +11,7 @@ public class UsbPlayer {
     Audio audioService;
 
     UsbPlayer(){
-        EntertainmentService entertainmentService = new EntertainmentService(Schedulers.computation());
+        EntertainmentService entertainmentService = myEntertainmentService.getEntertainmentService();
         usbService = entertainmentService.getUsb();
         browserService = entertainmentService.getBrowser();
         audioService = entertainmentService.getAudio();
