@@ -12,6 +12,7 @@ import java.util.Set;
 public interface MediaBrowser {
   Set<Audio.Connection> globalSS = EnumSet.allOf(Audio.Connection.class);
 
+
   /**
    * Returns a #List list of all known audio sources.
    * These can be used to limit the scope of lookup functions
@@ -20,6 +21,7 @@ public interface MediaBrowser {
    */
   List<Audio.Connection> getSources();
 
+
   /**
    * Returns a list of all available albums from all known sources.
    * @return A {@link List} of {@link Album}s
@@ -27,11 +29,14 @@ public interface MediaBrowser {
   default List<Album> getAlbums() {
     return getAlbums(globalSS);
   }
+
+
   /**
    * Returns a list of albums available from the given source[s].
    * @return A {@link List} of {@link Album}s
    */
   List<Album> getAlbums(Set<Audio.Connection> searchScope);
+
 
     /**
      * [Comfort Function] <br/>
@@ -43,6 +48,7 @@ public interface MediaBrowser {
     return searchAlbum(name, globalSS);
   }
 
+
     /**
      * Search for all occurrences of an album inside the supplied connections
      * @param name of the album to search
@@ -50,6 +56,7 @@ public interface MediaBrowser {
      * @return List of albums that were found
      */
   List<Album> searchAlbum(String name, Set<Audio.Connection> searchScope);
+
 
     /**
      * [Comfort Function] <br/>
@@ -60,6 +67,7 @@ public interface MediaBrowser {
   default List<Track> searchTrack(String name) {
     return searchTrack(name, globalSS);
   }
+
 
     /**
      * Search for all occurrences of a track inside the supplied connections
@@ -76,6 +84,7 @@ public interface MediaBrowser {
      * @return List of Tracks from the supplied Album, Empty List if album null or empty
      */
   List<Track> getAlbumTracks(Album album);
+
 
     /**
      * Get all globally available radioStations
