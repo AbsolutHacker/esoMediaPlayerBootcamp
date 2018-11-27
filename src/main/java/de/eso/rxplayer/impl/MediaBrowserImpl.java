@@ -35,6 +35,10 @@ public final class MediaBrowserImpl implements MediaBrowser {
         return connections;
     }
 
+    /**
+     * Overwrite the GlobalSearchScope as Radio is not built into this model
+     * @return the global SearchScope
+     */
     @Override
     public Set<Audio.Connection> getGlobalSearchScope() {
         EnumSet<Audio.Connection> globalSS = EnumSet.allOf(Audio.Connection.class);
@@ -43,27 +47,78 @@ public final class MediaBrowserImpl implements MediaBrowser {
     }
 
     @Override
-    public Observable<List<Album>> getAlbums(Set<Audio.Connection> searchScope) {
+    public Observable<Album> getAlbums(Set<Audio.Connection> searchScope) {
+
+        Observable<Track> allTracks = getAllTracksInScope(searchScope);
+
+        Observable<Integer> albumIds = allTracks
+                .map(Track::getAlbumId)
+                .distinct();
+
+        return albumIds.flatMapSingle(id -> es.getBrowser().albumById(id));
+    }
+
+    @Override
+    public Observable<Album> searchAlbum(String name, Set<Audio.Connection> searchScope) {
         return null;
     }
 
     @Override
-    public Observable<List<Album>> searchAlbum(String name, Set<Audio.Connection> searchScope) {
+    public Observable<Track> searchTrack(String name, Set<Audio.Connection> searchScope) {
         return null;
     }
 
     @Override
-    public Observable<List<Track>> searchTrack(String name, Set<Audio.Connection> searchScope) {
+    public Observable<Track> getAlbumTracks(Album album) {
         return null;
     }
 
     @Override
-    public Observable<List<Track>> getAlbumTracks(Album album) {
+    public Observable<Station> getStations() {
+
         return null;
     }
 
-    @Override
-    public Observable<List<Station>> getStations() {
-        return null;
+
+
+    private Observable<Track> getAllTracksInScope(Set<Audio.Connection> searchScope) {
+        Observable<List<Track>> usbTracks = null;
+        Observable<List<Track>> cdTracks = null;
+        Observable<Track> radioTrack = null;
+
+        for (Audio.Connection scope : searchScope) {
+            switch (scope) {
+                case USB:
+                    usbTracks = es.getUsb().list();
+                    break;
+                case CD:
+                    cdTracks = es.getCd().list();
+                    break;
+                case RADIO:
+                    radioTrack = es.getFm().radioText(); //get currently playing track
+                    break;
+            }
+        }
+
+
+        if (usbTracks == null) {
+            usbTracks = Observable.empty();
+        }
+        if (cdTracks == null) {
+            cdTracks = Observable.empty();
+        }
+        if (radioTrack == null) {
+            radioTrack = Observable.empty();
+        }
+
+        Observable<List<Track>> radioTrackList = radioTrack.map(track -> {
+            List<Track> tmpList = new ArrayList<>();
+            tmpList.add(track);
+            return tmpList;
+        });
+
+        Observable<List<Track>> concat = Observable.concat(usbTracks, cdTracks, radioTrackList);
+
+        return concat.flatMapIterable(track -> track);
     }
 }

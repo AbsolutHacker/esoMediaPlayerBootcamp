@@ -28,7 +28,7 @@ public interface MediaBrowser {
    * Returns a list of all available albums from all known sources.
    * @return A {@link List} of {@link Album}s
    */
-  default Observable<List<Album>> getAlbums() {
+  default Observable<Album> getAlbums() {
     return getAlbums(getGlobalSearchScope());
   }
 
@@ -37,7 +37,7 @@ public interface MediaBrowser {
    * Returns a list of albums available from the given source[s].
    * @return A {@link List} of {@link Album}s
    */
-  Observable<List<Album>> getAlbums(Set<Audio.Connection> searchScope);
+  Observable<Album> getAlbums(Set<Audio.Connection> searchScope);
 
 
     /**
@@ -46,7 +46,7 @@ public interface MediaBrowser {
      * @param name of the album to search
      * @return List of albums that were found
      */
-  default Observable<List<Album>> searchAlbum(String name) {
+  default Observable<Album> searchAlbum(String name) {
     return searchAlbum(name, getGlobalSearchScope());
   }
 
@@ -57,7 +57,7 @@ public interface MediaBrowser {
      * @param searchScope Connections which to search through
      * @return List of albums that were found
      */
-    Observable<List<Album>> searchAlbum(String name, Set<Audio.Connection> searchScope);
+    Observable<Album> searchAlbum(String name, Set<Audio.Connection> searchScope);
 
 
     /**
@@ -66,7 +66,7 @@ public interface MediaBrowser {
      * @param name of the track to search
      * @return List of tracks that were found
      */
-  default Observable<List<Track>> searchTrack(String name) {
+  default Observable<Track> searchTrack(String name) {
     return searchTrack(name, getGlobalSearchScope());
   }
 
@@ -77,7 +77,7 @@ public interface MediaBrowser {
      * @param searchScope Connections which to search through
      * @return List of tracks that were found
      */
-    Observable<List<Track>> searchTrack(String name, Set<Audio.Connection> searchScope);
+    Observable<Track> searchTrack(String name, Set<Audio.Connection> searchScope);
 
 
     /**
@@ -85,12 +85,12 @@ public interface MediaBrowser {
      * @param album to list the tracks of
      * @return List of Tracks from the supplied Album, Empty List if album null or empty
      */
-    Observable<List<Track>> getAlbumTracks(Album album);
+    Observable<Track> getAlbumTracks(Album album);
 
 
     /**
      * Get all globally available radioStations
      * @return List of Stations, Empty List if no stations currently available
      */
-    Observable<List<Station>> getStations();
+    Observable<Station> getStations();
 }
