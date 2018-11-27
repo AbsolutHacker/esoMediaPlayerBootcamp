@@ -11,6 +11,7 @@ final class SpeakerAudioSinkImpl implements AudioSink {
     private Audio.AudioState audioState;
     private Audio.Connection connection;
 
+    //private constructor for singleton purposes
     private SpeakerAudioSinkImpl() {
         this.connection = null;
         audioState = Audio.AudioState.STOPPED;
