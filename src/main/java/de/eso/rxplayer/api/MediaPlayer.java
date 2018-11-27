@@ -1,6 +1,7 @@
 package de.eso.rxplayer.api;
 
 import de.eso.rxplayer.Audio;
+import de.eso.rxplayer.Track;
 
 
 public interface MediaPlayer {
@@ -15,5 +16,5 @@ public interface MediaPlayer {
   void selectItem(int index);
 
   long getPlaytimeOffset();
-  int getCurrentTrack();
+  Track getCurrentTrack();
 }
