@@ -3,11 +3,14 @@ package de.eso.rxplayer.impl;
 import de.eso.rxplayer.*;
 import de.eso.rxplayer.api.MediaBrowser;
 import io.reactivex.Observable;
+import io.reactivex.Single;
+import io.reactivex.functions.Consumer;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Main Access point for getting the data for the MediaBrowser
@@ -47,41 +50,53 @@ public final class MediaBrowserImpl implements MediaBrowser {
     }
 
     @Override
-    public Observable<Album> getAlbums(Set<Audio.Connection> searchScope) {
+    public Observable<List<Album>> getAlbums(Set<Audio.Connection> searchScope) {
 
-        Observable<Track> allTracks = getAllTracksInScope(searchScope);
+        Observable<List<Track>> allTracks = getAllTracksInScope(searchScope);
 
-        Observable<Integer> albumIds = allTracks
-                .map(Track::getAlbumId)
-                .distinct();
+        Observable<List<Integer>> albumIds = allTracks
+                .map(tracks -> tracks
+                        .stream()
+                        .map(Track::getAlbumId)
+                        .distinct()
+                        .collect(Collectors.toList())
+                );
 
-        return albumIds.flatMapSingle(id -> es.getBrowser().albumById(id));
+        List<Album> albumList = new ArrayList<>();
+
+        albumIds.forEach(value -> value.forEach(id -> {
+                    Single<Album> albumSingle = es.getBrowser().albumById(id);
+                    albumSingle.subscribe((Consumer<Album>) albumList::add);
+                })
+        );
+
+        return Observable.fromArray(albumList);
     }
 
     @Override
-    public Observable<Album> searchAlbum(String name, Set<Audio.Connection> searchScope) {
+    public Observable<List<Album>> searchAlbum(String name, Set<Audio.Connection> searchScope) {
         return null;
     }
 
     @Override
-    public Observable<Track> searchTrack(String name, Set<Audio.Connection> searchScope) {
+    public Observable<List<Track>> searchTrack(String name, Set<Audio.Connection> searchScope) {
         return null;
     }
 
     @Override
-    public Observable<Track> getAlbumTracks(Album album) {
+    public Observable<List<Track>> getAlbumTracks(Album album) {
         return null;
     }
 
     @Override
-    public Observable<Station> getStations() {
-
+    public Observable<List<Station>> getStations() {
+        Observable<List<Station>> list = es.getFm().list();
         return null;
     }
 
 
 
-    private Observable<Track> getAllTracksInScope(Set<Audio.Connection> searchScope) {
+    private Observable<List<Track>> getAllTracksInScope(Set<Audio.Connection> searchScope) {
         Observable<List<Track>> usbTracks = null;
         Observable<List<Track>> cdTracks = null;
         Observable<Track> radioTrack = null;
@@ -117,8 +132,6 @@ public final class MediaBrowserImpl implements MediaBrowser {
             return tmpList;
         });
 
-        Observable<List<Track>> concat = Observable.concat(usbTracks, cdTracks, radioTrackList);
-
-        return concat.flatMapIterable(track -> track);
+        return Observable.concat(usbTracks, cdTracks, radioTrackList);
     }
 }
