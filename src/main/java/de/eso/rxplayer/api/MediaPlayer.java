@@ -39,6 +39,7 @@ public interface MediaPlayer {
    * @param source audio source
    */
   void selectSource(Audio.Connection source);
+
   /**
    * selects an item (e.g. a given track, file, or station)
    *

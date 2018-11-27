@@ -7,16 +7,31 @@ import de.eso.rxplayer.Track;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 public interface MediaBrowser {
-  EnumSet<Audio.Connection> globalSS = EnumSet.allOf(Audio.Connection.class);
+  Set<Audio.Connection> globalSS = EnumSet.allOf(Audio.Connection.class);
 
-  // global search methods
+  /**
+   * Returns a #List list of all known audio sources.
+   * These can be used to limit the scope of lookup functions
+   * such as getAlbums() or searchTrack(String).
+   * @return A list of all known audio sources.
+   */
   List<Audio.Connection> getSources();
+
+  /**
+   * Returns a list of all available albums from all known sources.
+   * @return A {@link List} of {@link Album}s
+   */
   default List<Album> getAlbums() {
     return getAlbums(globalSS);
   }
-  List<Album> getAlbums(EnumSet<Audio.Connection> searchScope);
+  /**
+   * Returns a list of albums available from the given source[s].
+   * @return A {@link List} of {@link Album}s
+   */
+  List<Album> getAlbums(Set<Audio.Connection> searchScope);
 
     /**
      * [Comfort Function] <br/>
@@ -34,7 +49,7 @@ public interface MediaBrowser {
      * @param searchScope Connections which to search through
      * @return List of albums that were found
      */
-  List<Album> searchAlbum(String name, EnumSet<Audio.Connection> searchScope);
+  List<Album> searchAlbum(String name, Set<Audio.Connection> searchScope);
 
     /**
      * [Comfort Function] <br/>
@@ -52,7 +67,8 @@ public interface MediaBrowser {
      * @param searchScope Connections which to search through
      * @return List of tracks that were found
      */
-  List<Track> searchTrack(String name, EnumSet<Audio.Connection> searchScope);
+  List<Track> searchTrack(String name, Set<Audio.Connection> searchScope);
+
 
     /**
      * Get all tracks of the supplied album
