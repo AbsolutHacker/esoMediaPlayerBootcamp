@@ -7,7 +7,7 @@ import de.eso.rxplayer.api.MediaPlayer;
  * MediaPlayer with all its buttons and functionality for the user to control the player
  */
 public final class MediaPlayerImpl implements MediaPlayer {
-    private static MediaPlayerImpl mediaPlayer = new MediaPlayerImpl();
+    private static MediaPlayerImpl mediaPlayer;
     private Player player = null;
     private Radio radio = null;
     private int lastRadioStation = 0;
@@ -16,6 +16,9 @@ public final class MediaPlayerImpl implements MediaPlayer {
     }
 
     public static MediaPlayerImpl getInstance() {
+        if(mediaPlayer == null){
+            mediaPlayer = new MediaPlayerImpl();
+        }
         return mediaPlayer;
     }
 
