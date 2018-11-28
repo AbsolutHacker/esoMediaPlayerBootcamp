@@ -1,5 +1,9 @@
 package de.eso.rxplayer.api;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 
 public class ApiResponse {
@@ -13,9 +17,12 @@ public class ApiResponse {
    * a server request or notification), it is guaranteed to not correspond to any previous
    * client request.
    */
-  public final int id;
-  public final String response;
-  public final Map<String,Object> params;
+  public int id;
+  /**
+   * The response <b>type</b>.
+   */
+  public String response;
+  public Map<String,Object> params;
 
   /**
    * Unsafe constructor accepting a given ID (request reference).
@@ -24,6 +31,7 @@ public class ApiResponse {
    * @param body
    * @throws IllegalArgumentException
    */
+  @JsonIgnore
   ApiResponse(int id, Type responseType, Map<String,Object> body) {
     if (responseType == null)
       throw new IllegalArgumentException("ApiResponse(): responseType required, given: " + responseType);
@@ -33,13 +41,24 @@ public class ApiResponse {
     this.params = body;
   }
 
+  @JsonIgnore
   public ApiResponse(ApiRequest reference, Type responseType, Map<String, Object> body) {
     this(reference.id, responseType, body);
   }
 
+  @JsonCreator
+  public ApiResponse(
+      @JsonProperty("id") int id,
+      @JsonProperty("response") String responseType,
+      @JsonProperty("params") Map<String, Object> params
+  ) {
+    this(id, Type.valueOf(responseType), params);
+  }
+
   public enum Type {
     SUCCESS,
-    ERROR
+    ERROR,
+    COMPLETION
   }
 
 }

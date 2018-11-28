@@ -89,7 +89,7 @@ public class EntertainmentControlServer {
                 // eating the exception
                 System.out.println("Yum-yum-yum, tasty exception...");
                 System.err.println(LocalDateTime.now() + " Failed to parse client request, ignoring");
-//                e.getCause().printStackTrace();
+                e.getCause().printStackTrace();
             }
 
 
@@ -106,6 +106,9 @@ public class EntertainmentControlServer {
         }
 
         private void handleRequest(ApiRequest request) {
+            // log for my personal amusement
+            System.out.println(Json.encodePrettily(request));
+
             Observable
                 .just(
                     new ApiResponse(
