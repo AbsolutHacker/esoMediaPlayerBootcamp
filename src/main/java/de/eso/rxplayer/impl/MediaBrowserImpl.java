@@ -95,8 +95,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
 
     @Override
     public Observable<List<Station>> getStations() {
-        Observable<List<Station>> list$ = es.getFm().list();
-        return null;
+        return es.getFm().list();
     }
 
 
