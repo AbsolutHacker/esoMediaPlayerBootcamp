@@ -59,10 +59,13 @@ class MediaBrowserImplTest {
         tracks$.subscribe(tracks -> tracks.forEach(track -> assertTrue(availableTracks.contains(track))));
     }
 
-
-
     @Test
     void getAlbumTracks() {
+        List<Track> availableTracks = getAvailAbleTracks();
+        MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
+
+        Observable<List<Track>> tracks$ = mediaBrowser.getAlbumTracks(getAvailableAlbums().get(0));
+        tracks$.subscribe(tracks -> tracks.forEach(track -> assertTrue(availableTracks.contains(track))));
     }
 
     @Test
