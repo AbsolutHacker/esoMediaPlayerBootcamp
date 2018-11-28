@@ -16,7 +16,7 @@ public interface MediaBrowser {
   }
 
   /**
-   * Returns a #List list of all known audio sources.
+   * Returns a List list of all known audio sources.
    * These can be used to limit the scope of lookup functions
    * such as getAlbums() or searchTrack(String).
    * @return A list of all known audio sources.

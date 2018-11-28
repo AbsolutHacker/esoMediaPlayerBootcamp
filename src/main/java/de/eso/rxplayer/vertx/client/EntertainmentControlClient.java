@@ -3,7 +3,6 @@ package de.eso.rxplayer.vertx.client;
 import de.eso.rxplayer.api.ApiResponse;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
-import io.vertx.core.Vertx;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.DecodeException;
@@ -28,7 +27,11 @@ public class EntertainmentControlClient {
     socket.frameHandler(this::responseHandler);
     newRequest(
         new ClientRequest(requestIndex++, "getAvailableSources")
-      );
+      )
+    .subscribe(response -> {
+      System.out.println("Congratulations, super awesome Rx-i-ness!");
+      System.err.println(Json.encodePrettily(response));
+    });
   }
 
   public Observable<ApiResponse> newRequest(ClientRequest request) {
@@ -66,7 +69,7 @@ public class EntertainmentControlClient {
 
       // if the response was an error or completion, notify its subscribers
       switch (response.response) {
-
+        // TODO just do something.. anything.
       }
 
     } catch (DecodeException | IllegalArgumentException e) {

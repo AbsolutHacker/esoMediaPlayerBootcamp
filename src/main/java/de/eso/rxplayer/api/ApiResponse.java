@@ -17,12 +17,12 @@ public class ApiResponse {
    * a server request or notification), it is guaranteed to not correspond to any previous
    * client request.
    */
-  public int id;
+  public final int id;
   /**
    * The response <b>type</b>.
    */
-  public String response;
-  public Map<String,Object> params;
+  public final String response;
+  public final Map<String,Object> params;
 
   /**
    * Unsafe constructor accepting a given ID (request reference).

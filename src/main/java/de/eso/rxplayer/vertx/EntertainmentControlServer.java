@@ -92,11 +92,7 @@ public class EntertainmentControlServer {
                 e.getCause().printStackTrace();
             }
 
-
-
             // TODO check integrity of the request object:
-            // - does it have an id?
-            // - does it map to a valid operation?
             // - do the contents of the request match the operation signature?
 
             // TODO call the operation with the given arguments
