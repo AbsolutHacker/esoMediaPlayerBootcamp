@@ -11,8 +11,9 @@ import java.util.List;
 import java.util.Set;
 
 public interface MediaBrowser {
-  Set<Audio.Connection> globalSS = EnumSet.allOf(Audio.Connection.class);
-
+  default Set<Audio.Connection> getGlobalSearchScope() {
+    return EnumSet.allOf(Audio.Connection.class);
+  }
 
   /**
    * Returns a #List list of all known audio sources.
@@ -20,7 +21,7 @@ public interface MediaBrowser {
    * such as getAlbums() or searchTrack(String).
    * @return A list of all known audio sources.
    */
-  List<Audio.Connection> getSources();
+  List<Audio.Connection> getAvailableSources();
 
 
   /**
@@ -28,7 +29,7 @@ public interface MediaBrowser {
    * @return A {@link List} of {@link Album}s
    */
   default Observable<List<Album>> getAlbums() {
-    return getAlbums(globalSS);
+    return getAlbums(getGlobalSearchScope());
   }
 
 
@@ -41,12 +42,12 @@ public interface MediaBrowser {
 
     /**
      * [Comfort Function] <br/>
-     * Calls {@link searchAlbum} with the global searchScope - {@link globalSS}
+     * Calls #searchAlbum with the global searchScope - #getGlobalSearchScope()
      * @param name of the album to search
      * @return List of albums that were found
      */
   default Observable<List<Album>> searchAlbum(String name) {
-    return searchAlbum(name, globalSS);
+    return searchAlbum(name, getGlobalSearchScope());
   }
 
 
@@ -61,12 +62,12 @@ public interface MediaBrowser {
 
     /**
      * [Comfort Function] <br/>
-     * Calls {@link searchTrack} with the global searchScope - {@link globalSS}
+     * Calls #searchTrack with the global searchScope - #getGlobalSearchScope()
      * @param name of the track to search
      * @return List of tracks that were found
      */
   default Observable<List<Track>> searchTrack(String name) {
-    return searchTrack(name, globalSS);
+    return searchTrack(name, getGlobalSearchScope());
   }
 
 
