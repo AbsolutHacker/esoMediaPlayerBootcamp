@@ -1,4 +1,9 @@
 .idea
+.gradle
+build
+lib
+out
+
 esoMediaPlayerBootcamp.iml
 vertx.log
 vertx.log.lck
