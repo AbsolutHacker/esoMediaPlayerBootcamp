@@ -1,8 +1,10 @@
 package de.eso.rxplayer.vertx;
 
+import de.eso.rxplayer.api.ApiRequest;
+import de.eso.rxplayer.api.ApiResponse;
 import de.eso.rxplayer.api.MediaBrowser;
 import de.eso.rxplayer.api.MediaPlayer;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.Observable;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -11,11 +13,10 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.Json;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class EntertainmentControlServer {
 
@@ -42,7 +43,6 @@ public class EntertainmentControlServer {
     }
 
     private void webSocketHandler(ServerWebSocket serverWebSocket) {
-        System.out.println("Accepted WebSocket connection to path " + serverWebSocket.path());
         vertx.deployVerticle(new Butler(serverWebSocket));
     }
 
@@ -54,11 +54,10 @@ public class EntertainmentControlServer {
     private class Butler extends AbstractVerticle {
 
         private final ServerWebSocket socket;
-        private List<Disposable> liabilities;
+        private final Map<Integer,ApiRequest> pendingRequests = new HashMap<>();
 
         Butler(ServerWebSocket serverWebSocket) {
             this.socket = serverWebSocket;
-            this.liabilities = new ArrayList<>();
         }
 
         @Override
@@ -69,9 +68,6 @@ public class EntertainmentControlServer {
 
         @Override
         public void stop() {
-            // cancel all subscriptions quietly
-            for (Disposable disposable : liabilities)
-                disposable.dispose();
             // close the socket
             socket.close();
         }
@@ -80,11 +76,20 @@ public class EntertainmentControlServer {
             try {
                 // TODO check up on how dangerous this is
                 // no sanitization whatsoever has been performed up to this point
-                Map<String, Object> requestObject = buffer.toJsonObject().getMap();
-            } catch (DecodeException e) {
+                ApiRequest requestPojo = buffer.toJsonObject().mapTo(ApiRequest.class);
+                if (requestPojo.isValid()) {
+                    if (pendingRequests.containsKey(requestPojo.id)) {
+                        // request id exists, do something
+                    } else {
+                        pendingRequests.put(requestPojo.id, requestPojo);
+                        handleRequest(requestPojo);
+                    }
+                }
+            } catch (DecodeException | IllegalArgumentException e) {
                 // eating the exception
                 System.out.println("Yum-yum-yum, tasty exception...");
                 System.err.println(LocalDateTime.now() + " Failed to parse client request, ignoring");
+//                e.getCause().printStackTrace();
             }
 
 
@@ -98,6 +103,23 @@ public class EntertainmentControlServer {
 
             //      if the operation returns an observable,
             // TODO subscribe the response handler to that observable
+        }
+
+        private void handleRequest(ApiRequest request) {
+            Observable
+                .just(
+                    new ApiResponse(
+                        request,
+                        ApiResponse.Type.SUCCESS,
+                        new HashMap<>()
+                    )
+                )
+                .subscribe(this::handleResponse)
+            ;
+        }
+
+        private void handleResponse(ApiResponse response) {
+            socket.writeFinalTextFrame(Json.encodePrettily(response));
         }
 
     }
