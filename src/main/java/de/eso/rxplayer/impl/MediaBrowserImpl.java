@@ -159,7 +159,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
                 );
 
         //ToDo flatmap should probably be used here in some case
-//        Observable<List<Single<Album>>> obsSingleAlbumList = albumIds
+//        Observable<List<Single<Album>>> obsSingleAlbumList = albumIds$
 //                .map(values -> values.stream()
 //                        .map(id -> es.getBrowser().albumById(id))
 //                        .collect(Collectors.toList())
@@ -171,7 +171,6 @@ public final class MediaBrowserImpl implements MediaBrowser {
 //                            Observable<Album> albumObservable = albumSingle.toObservable();
 //                        })
 //                );
-
 
         List<Album> albumList = new ArrayList<>();
 
