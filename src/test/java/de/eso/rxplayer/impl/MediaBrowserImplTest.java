@@ -3,6 +3,7 @@ package de.eso.rxplayer.impl;
 import de.eso.rxplayer.Album;
 import de.eso.rxplayer.Audio;
 import de.eso.rxplayer.Station;
+import de.eso.rxplayer.Track;
 import io.reactivex.Observable;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -51,7 +52,14 @@ class MediaBrowserImplTest {
 
     @Test
     void searchTrack() {
+        List<Track> availableTracks = getAvailAbleTracks();
+        MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
+
+        Observable<List<Track>> tracks$ = mediaBrowser.searchTrack("Trap Queen");
+        tracks$.subscribe(tracks -> tracks.forEach(track -> assertTrue(availableTracks.contains(track))));
     }
+
+
 
     @Test
     void getAlbumTracks() {
@@ -70,6 +78,21 @@ class MediaBrowserImplTest {
         assertTrue(knownStations.size() == 0); //every known station should have been found and deleted
     }
 
+    @NotNull
+    private List<Track> getAvailAbleTracks() {
+        List<Track> availableTracks = new ArrayList<>();
+        availableTracks.add(new Track(
+                1,
+                1,
+                6,
+                "Trap Queen",
+                222,
+                "2017-08-21T06:20:35.799Z",
+                "2017-08-21T06:20:35.799Z"
+        ));
+
+        return availableTracks;
+    }
 
     @NotNull
     private List<Album> getAvailableAlbums() {
