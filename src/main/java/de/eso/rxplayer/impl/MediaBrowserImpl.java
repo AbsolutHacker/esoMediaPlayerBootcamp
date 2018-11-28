@@ -4,9 +4,13 @@ import de.eso.rxplayer.*;
 import de.eso.rxplayer.api.MediaBrowser;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import kotlin.NotImplementedError;
+import io.reactivex.Single;
 import io.reactivex.functions.Consumer;
 import kotlin.NotImplementedError;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
