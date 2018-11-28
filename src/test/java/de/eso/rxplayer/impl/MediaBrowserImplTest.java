@@ -1,5 +1,6 @@
 package de.eso.rxplayer.impl;
 
+import de.eso.rxplayer.Audio;
 import de.eso.rxplayer.Station;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,18 @@ class MediaBrowserImplTest {
 
     @Test
     void getAvailableSources() {
+        List<Audio.Connection> availableSources = new ArrayList<>();
+        availableSources.add(Audio.Connection.CD);
+        availableSources.add(Audio.Connection.USB);
+
+        MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
+        List<Audio.Connection> sources = mediaBrowser.getAvailableSources();
+        sources.forEach(source -> {
+            assertTrue(availableSources.contains(source));
+            availableSources.remove(source);
+        });
+
+        assertTrue(availableSources.size() == 0);
     }
 
     @Test
