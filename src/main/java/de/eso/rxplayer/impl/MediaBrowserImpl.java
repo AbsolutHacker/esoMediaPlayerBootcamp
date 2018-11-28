@@ -5,6 +5,7 @@ import de.eso.rxplayer.api.MediaBrowser;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.Consumer;
+import kotlin.NotImplementedError;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -95,7 +96,15 @@ public final class MediaBrowserImpl implements MediaBrowser {
 
     @Override
     public Observable<List<Station>> getStations() {
-        return es.getFm().list();
+        Observable<List<Station>> stationList = null;
+        try {
+            Radio radio = es.getFm();
+            stationList = radio.list();
+        } catch (NotImplementedError error) {
+            //radio is not built in
+            stationList = Observable.empty();
+        }
+        return stationList;
     }
 
 
