@@ -2,12 +2,14 @@ package de.eso.rxplayer.impl;
 
 import de.eso.rxplayer.*;
 import de.eso.rxplayer.api.MediaPlayer;
+import kotlin.NotImplementedError;
 
 /**
  * MediaPlayer with all its buttons and functionality for the user to control the player
  */
 public final class MediaPlayerImpl implements MediaPlayer {
     private static MediaPlayerImpl mediaPlayer;
+    private static final Audio.Connection DEFAULT_SOURCE = Audio.Connection.CD;
     private Player player = null;
     private Radio radio = null;
     private int lastRadioStation = 0;
@@ -24,24 +26,59 @@ public final class MediaPlayerImpl implements MediaPlayer {
 
     @Override
     public void play() {
+        if(player == null && radio == null){
+            selectSource(Audio.Connection.RADIO);
+        }
         if (player == null && radio != null) {
             return; //Play was pressed in radio mode -> do nothing
         }
 
-        //ToDo default case when nothing was initialized
-
         if (player != null) {
-            player.play();
+            player.play().subscribe(() -> {
+                System.out.println("complete");// handle completion
+            }, throwable -> {
+
+                System.out.println("error");
+                throwable.printStackTrace();// handle error
+            });
         }
     }
 
     @Override
     public void pause() {
+        if(player == null && radio == null){
+            selectSource(Audio.Connection.RADIO);
+        }
+        if (player == null && radio != null) {
+            return; //Play was pressed in radio mode -> do nothing
+        }
+
+        if (player != null) {
+            player.pause().subscribe(() -> {
+                return;
+            }, throwable -> {
+                throw new Exception("test");
+            });
+        }
 
     }
 
     @Override
     public void stop() {
+        if(player == null && radio == null){
+            selectSource(Audio.Connection.RADIO);
+        }
+        if (player == null && radio != null) {
+            return; //Play was pressed in radio mode -> do nothing
+        }
+
+        if (player != null) {
+            player.pause().subscribe(() -> {
+                return;
+            }, throwable -> {
+                throw new Exception("test");
+            });
+        }
 
     }
 
@@ -58,6 +95,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
     @Override
     public void selectSource(Audio.Connection source) {
         EntertainmentService es = myEntertainmentService.getEntertainmentService();
+        try{
         switch (source) {
             case USB:
                 player = es.getUsb();
@@ -68,8 +106,10 @@ public final class MediaPlayerImpl implements MediaPlayer {
             case RADIO:
                 player = null;
                 radio = es.getFm();
-                radio.select(lastRadioStation); //automatically start the radio
-                break;
+                radio.select(lastRadioStation);
+        }
+        } catch (NotImplementedError e){
+           selectSource(DEFAULT_SOURCE);
         }
     }
 
@@ -86,5 +126,15 @@ public final class MediaPlayerImpl implements MediaPlayer {
     @Override
     public Track getCurrentTrack() {
         return null;
+    }
+
+    public static void main(String[] args) {
+        MediaPlayerImpl mp = MediaPlayerImpl.getInstance();
+        mp.play();
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

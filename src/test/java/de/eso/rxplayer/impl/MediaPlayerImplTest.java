@@ -1,7 +1,7 @@
 package de.eso.rxplayer.impl;
 
 import de.eso.rxplayer.Audio;
-import de.eso.rxplayer.api.MediaPlayer;
+import de.eso.rxplayer.Player;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +12,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class MediaPlayerImplTest {
 
+    /**
+     * reset Singleton to initial state
+     */
     @BeforeEach
     void setUp() {
         Field instance = null;
@@ -33,21 +36,57 @@ class MediaPlayerImplTest {
     }
 
     @Test
-    void play() {
+    void playInitialCall() {
         Field playerField = null;
+        Field playerConnection = null;
         try {
-            playerField = MediaPlayerImpl.class.getDeclaredField("player");
             MediaPlayerImpl mp = MediaPlayerImpl.getInstance();
+
+            playerField = MediaPlayerImpl.class.getDeclaredField("player");
+            playerField.setAccessible(true);
+            Player p = (Player) playerField.get(MediaPlayerImpl.getInstance());
+            Assert.assertNull(p);
+
             mp.play();
-            Assert.assertNull(playerField);
-            mp.selectSource(Audio.Connection.USB);
-            mp.play();
+
+            p = (Player) playerField.get(MediaPlayerImpl.getInstance());
+            playerConnection = p.getClass().getDeclaredField("connection");
+            playerConnection.setAccessible(true);
+
+            Audio.Connection c = (Audio.Connection) playerConnection.get(p);
+            Assert.assertEquals("CD", c.name());
+
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
+    }
 
+    @Test
+    void playUSB() {
+        Field playerField = null;
+        Field playerConnection = null;
+        try {
+            MediaPlayerImpl mp = MediaPlayerImpl.getInstance();
 
+            playerField = MediaPlayerImpl.class.getDeclaredField("player");
+            playerField.setAccessible(true);
 
+            mp.selectSource(Audio.Connection.USB);
+            mp.play();
+
+            Player p = (Player) playerField.get(MediaPlayerImpl.getInstance());
+            playerConnection = p.getClass().getDeclaredField("connection");
+            playerConnection.setAccessible(true);
+
+            Audio.Connection c = (Audio.Connection) playerConnection.get(p);
+            Assert.assertEquals("USB", c.name());
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
