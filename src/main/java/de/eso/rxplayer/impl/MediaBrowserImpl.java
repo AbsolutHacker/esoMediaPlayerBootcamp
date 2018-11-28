@@ -60,23 +60,37 @@ public final class MediaBrowserImpl implements MediaBrowser {
         Observable<List<Track>> tracks$ = getAllTracksInScope(searchScope);
         Observable<List<Album>> albums$ = getAlbumsFromTracks(tracks$);
 
-        Observable<List<Album>> searchedAlbums = albums$
+        Observable<List<Album>> searchedAlbums$ = albums$
                 .map(albums -> albums.stream()
                         .filter(album -> album.getName().equals(name))
                         .collect(Collectors.toList())
                 );
 
-        return searchedAlbums;
+        return searchedAlbums$;
     }
 
     @Override
     public Observable<List<Track>> searchTrack(String name, Set<Audio.Connection> searchScope) {
-        return null;
+        Observable<List<Track>> tracks$ = getAllTracksInScope(searchScope);
+        Observable<List<Track>> searchedTracks$ = tracks$
+                .map(tracks -> tracks.stream()
+                        .filter(track -> track.getTitle().equals(name))
+                        .collect(Collectors.toList())
+                );
+
+        return searchedTracks$;
     }
 
     @Override
     public Observable<List<Track>> getAlbumTracks(Album album) {
-        return null;
+        Observable<List<Track>> tracks$ = getAllTracksInScope(getGlobalSearchScope());
+
+        Observable<List<Track>> albumTracks$ = tracks$.map(tracks -> tracks.stream()
+                .filter(track -> track.getAlbumId() == album.getId())
+                .collect(Collectors.toList())
+        );
+
+        return albumTracks$;
     }
 
     @Override
