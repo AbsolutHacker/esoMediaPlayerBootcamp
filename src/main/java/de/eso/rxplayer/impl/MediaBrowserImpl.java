@@ -57,6 +57,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
         Observable<List<Track>> tracks$ = getAllTracksInScope(searchScope);
         Observable<List<Album>> albums$ = getAlbumsFromTracks(tracks$);
 
+        //filter from all albums the ones that have the same name as the one searched for
         Observable<List<Album>> searchedAlbums$ = albums$
                 .map(albums -> albums.stream()
                         .filter(album -> album.getName().equals(name))
@@ -69,6 +70,8 @@ public final class MediaBrowserImpl implements MediaBrowser {
     @Override
     public Observable<List<Track>> searchTrack(String name, Set<Audio.Connection> searchScope) {
         Observable<List<Track>> tracks$ = getAllTracksInScope(searchScope);
+
+        //filter from all titles the ones that have the same name as the one searched for
         Observable<List<Track>> searchedTracks$ = tracks$
                 .map(tracks -> tracks.stream()
                         .filter(track -> track.getTitle().equals(name))
@@ -82,6 +85,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
     public Observable<List<Track>> getAlbumTracks(Album album) {
         Observable<List<Track>> tracks$ = getAllTracksInScope(getGlobalSearchScope());
 
+        //filter from all tracks the ones that have the same albumId as the album searched for
         Observable<List<Track>> albumTracks$ = tracks$.map(tracks -> tracks.stream()
                 .filter(track -> track.getAlbumId() == album.getId())
                 .collect(Collectors.toList())
@@ -110,6 +114,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
         Observable<List<Track>> cdTracks$ = null;
         Observable<Track> radioTrack$ = null;
 
+        //fill the list for every type of connection -> possibly different set of tracks
         for (Audio.Connection scope : searchScope) {
             switch (scope) {
                 case USB:
@@ -124,7 +129,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
             }
         }
 
-
+        //if the lists are null because of any reason look at them as if they were empty
         if (usbTracks$ == null) {
             usbTracks$ = Observable.empty();
         }
@@ -135,18 +140,21 @@ public final class MediaBrowserImpl implements MediaBrowser {
             radioTrack$ = Observable.empty();
         }
 
+        //radio always just has a single track
         Observable<List<Track>> radioTrackList$ = radioTrack$.map(track -> {
             List<Track> tmpList = new ArrayList<>();
             tmpList.add(track);
             return tmpList;
         });
 
+        //concat all different sources together. Here the default information what came from where is lost
         return Observable.concat(usbTracks$, cdTracks$, radioTrackList$);
     }
 
 
-    private Observable<List<Album>> getAlbumsFromTracks(Observable<List<Track>> obsTracks$) {
-        Observable<List<Integer>> albumIds$ = obsTracks$
+    private Observable<List<Album>> getAlbumsFromTracks(Observable<List<Track>> tracks$) {
+        //map all tracks into their AlbumIds (distinct)
+        Observable<List<Integer>> albumIds$ = tracks$
                 .map(tracks -> tracks
                         .stream()
                         .map(Track::getAlbumId)
@@ -154,11 +162,12 @@ public final class MediaBrowserImpl implements MediaBrowser {
                         .collect(Collectors.toList())
                 );
 
-        Observable<List<Album>> gottenAlbums = albumIds$.flatMapSingle(albumIds -> {
+        //map each Integer to it's album
+        Observable<List<Album>> gottenAlbums = albumIds$.flatMapSingle(albumIds -> { //flatMapSINGLE
             List<Single<Album>> singleList = albumIds.stream()
-                    .map(id -> es.getBrowser().albumById(id))
+                    .map(id -> es.getBrowser().albumById(id)) //get the Single<Album>
                     .collect(Collectors.toList());
-            return Single.zip(singleList, array -> {
+            return Single.zip(singleList, array -> { //zip that Single<Album> back to Album
                 Album[] albumArray = Arrays.stream(array).toArray(Album[]::new);
                 List<Album> albums = Arrays.asList(albumArray);
                 return albums;
