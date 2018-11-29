@@ -4,7 +4,6 @@ import de.eso.rxplayer.*;
 import de.eso.rxplayer.Audio.AudioState;
 import de.eso.rxplayer.api.MediaPlayer;
 import io.reactivex.Completable;
-import io.reactivex.Observable;
 import kotlin.NotImplementedError;
 
 /**
@@ -20,6 +19,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
     private AudioState currentState = AudioState.STOPPED;
 
     private MediaPlayerImpl() {
+
     }
 
     public static MediaPlayerImpl getInstance() {
@@ -31,14 +31,13 @@ public final class MediaPlayerImpl implements MediaPlayer {
 
     @Override
     public void play(){
-        playInner().subscribe(() -> {
-            System.out.println("complete");
-        },
-        throwable -> {
-            throwable.printStackTrace();
-        });
+        EntertainmentService es = myEntertainmentService.getEntertainmentService();
+        playInner()
+                .mergeWith(es.getAudio().fadeIn(currentSource))
+                .subscribe(() -> {
+            System.out.println("play complete");
+        }, Throwable::printStackTrace);
     }
-
 
     private Completable playInner() {
         System.out.println("press play");
@@ -74,50 +73,95 @@ public final class MediaPlayerImpl implements MediaPlayer {
     }
 
     @Override
-    public void pause() {
+    public void pause(){
         System.out.println("press pause");
+        EntertainmentService es = myEntertainmentService.getEntertainmentService();
+
+        es.getAudio().fadeOut(currentSource)
+                .mergeWith(pauseInner())
+                .subscribe(() -> {
+                    System.out.println("pause complete");
+                },
+                throwable -> {
+                    throwable.printStackTrace();
+                });
+    }
+
+    private Completable pauseInner() {
+        System.out.println("call pauseInner");
+        Completable startsPlaying = Completable.complete();
         if (player == null) {
             if(radio == null){
                 selectSource(DEFAULT_SOURCE);
-            } else { return;  } //Play was pressed in radio mode -> do nothing
+            } else {
+                System.out.println("pause -> Player == null AND Radio != null");
+                return Completable.complete();
+            } //Play was pressed in radio mode -> do nothing
         } else {
             switch (currentState){
                 case STOPPED:
-                    break;
+                    System.out.println("pause -> STOPPED");
+                    return Completable.error(() -> new Exception("Wrong state for execute pause"));
                 case STARTING:
-                    break;
+                    System.out.println("pause -> STARTING");
+                    return Completable.error(() -> new Exception("Wrong state for execute pause"));
                 case STARTED:
-                    player.pause().subscribe(() -> {
-                        System.out.println("complete");// handle completion
-                    }, throwable -> {
-                        System.out.println("error");
-                        //throwable.printStackTrace();// handle error
-                    });
+                    System.out.println("pause -> STARTED");
+                    startsPlaying = player.isPlaying()
+                            .takeLast(1)
+                            .flatMapCompletable((verifyPlayState) -> {
+                                if (verifyPlayState) {
+                                    System.out.println("is playing -> starts pausing");
+                                    return player.pause();
+                                } else {
+                                    System.out.println("not playing -> do nothing");
+                                    return Completable.complete();
+                                }
+                            });
                     break;
                 case STOPPING:
-                    break;
+                    System.out.println("pause -> STOPPING");
+                    return Completable.error(() -> new Exception("Wrong state for execute play"));
             }
         }
+        return startsPlaying;
     }
 
     @Override
-    public void stop() {
+    public void stop(){
         EntertainmentService es = myEntertainmentService.getEntertainmentService();
-        es.getAudio().fadeOut(currentSource);
 
-        if(player == null && radio == null){
-            selectSource(DEFAULT_SOURCE);
+        es.getAudio().fadeOut(currentSource)
+            .mergeWith(playInner())
+            .subscribe(() -> {
+                    System.out.println("complete");
+                },
+                throwable -> {
+                    throwable.printStackTrace();
+                });
+    }
+    private Completable stopInner() {
+        System.out.println("press play");
+        EntertainmentService es = myEntertainmentService.getEntertainmentService();
+        Completable startsPlaying = Completable.complete();
+        if (player == null) {
+            if(radio == null){
+                selectSource(DEFAULT_SOURCE);
+            } else { return Completable.complete();  } //Play was pressed in radio mode -> do nothing
+        } else {
+            switch (currentState){
+                case STOPPED:
+                    return Completable.error(() -> new Exception("Wrong state for execute play"));
+                case STARTING:
+                    return Completable.error(() -> new Exception("Wrong state for execute play"));
+                case STARTED:
+                    es.getAudio().stop(currentSource);
+                    break;
+                case STOPPING:
+                    return Completable.error(() -> new Exception("Wrong state for execute play"));
+            }
         }
-        if (player == null && radio != null) {
-            return; //Play was pressed in radio mode -> do nothing
-        }
-        if (player != null) {
-            player.pause().subscribe(() -> {
-                return;
-            }, throwable -> {
-                throw new Exception("test");
-            });
-        }
+        return startsPlaying;
     }
 
     @Override
@@ -134,16 +178,16 @@ public final class MediaPlayerImpl implements MediaPlayer {
     public void selectSource(Audio.Connection source) {
         EntertainmentService es = myEntertainmentService.getEntertainmentService();
         if(currentSource == null){
-            switchSource(source);
+            manageSources(source);
         }else if(currentSource != source){
             System.out.println("select source");
             es.getAudio().fadeOut(currentSource).subscribe(() -> {
                 es.getAudio().stop(currentSource);
-            }, Throwable::printStackTrace);
+            });
         }
     }
 
-    private void switchSource(Audio.Connection source){
+    private void manageSources(Audio.Connection source){
         EntertainmentService es = myEntertainmentService.getEntertainmentService();
         es.getAudio().observe(source)
                 .subscribe(event -> {
@@ -153,36 +197,41 @@ public final class MediaPlayerImpl implements MediaPlayer {
                     {
                         case STARTED:
                             System.out.println("fade in: " + source.name());
-                            es.getAudio().fadeIn(currentSource);
                             break;
                         case STOPPED:
-                            try{
-                                switch (source) {
-                                    case USB:
-                                        radio = null;
-                                        player = es.getUsb();
-                                        es.getAudio().start(Audio.Connection.USB);
-                                        break;
-                                    case CD:
-                                        radio = null;
-                                        player = es.getCd();
-                                        es.getAudio().start(Audio.Connection.CD);
-                                        break;
-                                    case RADIO:
-                                        player = null;
-                                        radio = es.getFm();
-                                        radio.select(lastRadioStation);
-                                        es.getAudio().start(Audio.Connection.RADIO);
-                                }
-                            } catch (NotImplementedError e){
-                                selectSource(DEFAULT_SOURCE);
-                            }
+                            stopped(source);
                             break;
                         default:
                             System.out.println( event.name() + " -> " + "Nothing happens");
                     }
                 });
-        currentSource = source;
+    }
+
+    private void stopped(Audio.Connection source){
+        EntertainmentService es = myEntertainmentService.getEntertainmentService();
+        try{
+            if(currentSource != source){
+                switch (source) {
+                    case USB:
+                        radio = null;
+                        player = es.getUsb();
+                        break;
+                    case CD:
+                        radio = null;
+                        player = es.getCd();
+                        break;
+                    case RADIO:
+                        player = null;
+                        radio = es.getFm();
+                        radio.select(lastRadioStation);
+                }
+                currentSource = source;
+                es.getAudio().start(source);
+            }
+
+        } catch (NotImplementedError e){
+            selectSource(DEFAULT_SOURCE);
+        }
     }
 
     @Override
@@ -205,17 +254,29 @@ public final class MediaPlayerImpl implements MediaPlayer {
             MediaPlayerImpl mp = MediaPlayerImpl.getInstance();
             mp.selectSource(Audio.Connection.CD);
             mp.play();
-            Thread.sleep(1000);
+            Thread.sleep(500);
             mp.play();
-            Thread.sleep(1000);
+            Thread.sleep(500);
             mp.play();
-            Thread.sleep(1000);
+            Thread.sleep(500);
             mp.play();
-            Thread.sleep(1000);
+            Thread.sleep(500);
             mp.play();
-            Thread.sleep(1000);
+            Thread.sleep(500);
             mp.play();
-            //mp.switchSource(Audio.Connection.USB);
+            Thread.sleep(500);
+            mp.pause();
+            Thread.sleep(500);
+            mp.pause();
+            Thread.sleep(500);
+            mp.pause();
+            Thread.sleep(500);
+            mp.play();
+            Thread.sleep(500);
+            mp.play();
+            Thread.sleep(500);
+            mp.pause();
+            //mp.manageSources(Audio.Connection.USB);
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
