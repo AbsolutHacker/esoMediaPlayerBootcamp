@@ -31,44 +31,46 @@ public final class MediaPlayerImpl implements MediaPlayer {
 
     @Override
     public void play(){
-        Completable completable = Completable.fromObservable(playInner());
-        completable.subscribe(() -> {
+        playInner().subscribe(() -> {
             System.out.println("complete");
         },
         throwable -> {
-            System.out.println("error");
+            throwable.printStackTrace();
         });
     }
 
 
-    private Observable playInner() {
+    private Completable playInner() {
         System.out.println("press play");
-        Observable<Object> objectObservable = Observable.empty();
+        Completable startsPlaying = Completable.complete();
         if (player == null) {
             if(radio == null){
                 selectSource(DEFAULT_SOURCE);
-            } else { return Observable.empty();  } //Play was pressed in radio mode -> do nothing
+            } else { return Completable.complete();  } //Play was pressed in radio mode -> do nothing
         } else {
             switch (currentState){
                 case STOPPED:
-                    break;
+                    return Completable.error(() -> new Exception("Wrong state for execute play"));
                 case STARTING:
-                    break;
+                    return Completable.error(() -> new Exception("Wrong state for execute play"));
                 case STARTED:
-                    objectObservable = player.isPlaying().switchMap((verifyPlaing) -> {
-                        if (!verifyPlaing) {
-                            System.out.println("not playing");
-                            return player.play().toObservable();
-                        }
-                        System.out.println("playing");
-                        return Completable.complete().toObservable();
+                    startsPlaying = player.isPlaying()
+                            .take(1)
+                            .flatMapCompletable((verifyPlayState) -> {
+                                if (!verifyPlayState) {
+                                    System.out.println("not playing -> starts playing");
+                                    return player.play();
+                                } else {
+                                    System.out.println("is playing -> do nothing");
+                                    return Completable.complete();
+                                }
                     });
                     break;
                 case STOPPING:
-                    break;
+                    return Completable.error(() -> new Exception("Wrong state for execute play"));
             }
         }
-        return objectObservable;
+        return startsPlaying;
     }
 
     @Override
