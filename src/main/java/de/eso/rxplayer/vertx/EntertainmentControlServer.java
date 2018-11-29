@@ -2,6 +2,7 @@ package de.eso.rxplayer.vertx;
 
 import de.eso.rxplayer.Album;
 import de.eso.rxplayer.api.*;
+import de.eso.rxplayer.api.impl.Responder;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
@@ -24,14 +25,10 @@ public class EntertainmentControlServer {
 
     private static final int DEFAULT_LISTEN_PORT = 8091;
 
-    private final MediaPlayer mediaPlayer;
-    private final MediaBrowser mediaBrowser;
     private final ApiAdapter apiAdapter;
     private final Vertx vertx;
 
     EntertainmentControlServer(MediaPlayer mediaPlayer, MediaBrowser mediaBrowser) {
-        this.mediaPlayer = mediaPlayer;
-        this.mediaBrowser = mediaBrowser;
         this.apiAdapter = new ApiAdapter(mediaPlayer, mediaBrowser);
         this.vertx = Vertx.vertx();
     }
@@ -96,30 +93,9 @@ public class EntertainmentControlServer {
 
         }
 
-        private class Responder implements Observer {
-
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
-
-            @Override
-            public void onNext(Object o) {
-
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-
-        }
+        @SuppressWarnings("unchecked")
         private void handleRequest(ApiRequest request) {
+
             // log for my personal amusement
             System.out.println(Json.encodePrettily(request));
 
@@ -132,37 +108,13 @@ public class EntertainmentControlServer {
             // TODO subscribe the response handler to that observable
 
             try {
-                Callable<Observable> c =
-                apiAdapter.translate(request.params.get("target").toString());
-                System.out.println("ApiAdapter#translate returned " + c);
-//                c
-//                    .call()
-//                    .map(list -> {
-//                        System.out.println(list);
-//                     return   new ApiResponse(
-//                            request,
-//                            ApiResponse.Type.SUCCESS,
-//                            new HashMap<String, Object>() {{
-//                                put("params", Json.encodePrettily(list));
-//                            }}
-//                        );
-//                    })
-//                    .subscribe(this::writeResponse);
+                apiAdapter.invokeAsync(request.params.get("target").toString())
+                    .subscribe(new Responder(request, this::writeResponse));
             } catch (Exception e) {
                 System.out.println("Something went wrong while trying to invoke an ApiAdapter function");
                 e.printStackTrace();
             }
 
-            Observable
-                .just(
-                    new ApiResponse(
-                        request,
-                        ApiResponse.Type.SUCCESS,
-                        new HashMap<>()
-                    )
-                )
-                .subscribe(this::writeResponse)
-            ;
         }
 
         private void writeResponse(ApiResponse response) {
