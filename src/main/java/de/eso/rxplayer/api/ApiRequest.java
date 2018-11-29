@@ -31,6 +31,7 @@ public class ApiRequest {
    * </ul>
    */
   public String request;
+  public String target;
   /**
    *
    */
