@@ -7,7 +7,7 @@ import java.util.Map;
  * The "POJO" (<i>Plain Old Java Object</i>) class corresponding to a single client request. Client
  * requests are usually encoded as JSON strings before conversion to an ApiRequest.
  */
-public class ApiRequest {
+public class ApiRequest<E> {
   /**
    * The ID number of the request, as chosen by the client. All responses to this request need to
    * refer to this ID. <b>Note:</b> it is the client's responsibility to ensure uniqueness of the

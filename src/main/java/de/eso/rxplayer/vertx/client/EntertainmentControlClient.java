@@ -15,7 +15,7 @@ public class EntertainmentControlClient {
 
   private final WebSocket socket;
   private int requestIndex = 128;
-  private final Map<Integer, BehaviorSubject<ApiResponse>> pendingRequests;
+  private final Map<Integer, BehaviorSubject<? extends ApiResponse>> pendingRequests;
 
   public EntertainmentControlClient(WebSocket webSocket) {
     this.socket = webSocket;
@@ -26,9 +26,9 @@ public class EntertainmentControlClient {
     socket.frameHandler(this::responseHandler);
   }
 
-  public Observable<ApiResponse> request(ClientRequest request) {
+  public <E extends Object> Observable<ApiResponse<E>> request(ClientRequest request) {
     // create an Observable
-    BehaviorSubject<ApiResponse> responseChannel = BehaviorSubject.create();
+    BehaviorSubject<ApiResponse<E>> responseChannel = BehaviorSubject.create();
 
     // queue it by its requestId
     pendingRequests.put(request.id, responseChannel);
@@ -40,28 +40,30 @@ public class EntertainmentControlClient {
     return responseChannel.hide();
   }
 
-  public Observable<ApiResponse> newRequest(String singleMethodToInvoke) {
+  public <E> Observable<ApiResponse<E>> newRequest(String singleMethodToInvoke) {
     return request(new ClientRequest(requestIndex++, singleMethodToInvoke));
   }
 
-  private void responseHandler(WebSocketFrame frame) {
+  // SUPER UNSAFE
+  //@SuppressWarnings("unchecked")
+  private <E> void responseHandler(WebSocketFrame frame) {
 
     try {
 
       System.out.println(frame.binaryData());
       // jsonify frame -> get ApiResponse object
-      ApiResponse response = frame.binaryData().toJsonObject().mapTo(ApiResponse.class);
+      ApiResponse<E> response = frame.binaryData().toJsonObject().mapTo(ApiResponse.class);
 
-      // lookup the responseChannel from the /pending/ map
-      BehaviorSubject<ApiResponse> responseChannel = pendingRequests.get(response.id);
+      // lookup the responseChannel from the "pending" map
+      BehaviorSubject<? extends ApiResponse> responseChannel = pendingRequests.get(response.id);
 
       // notify the response's subscribers if the request was successful;
       // if it was an error or completion, notify its subscribers and discard
       // the response channel object
-      if (responseChannel != null) {
+      if (null != responseChannel) {
         switch (response.response) {
           case "ERROR":
-            responseChannel.onError(new RejectedExecutionException(response.params.toString()));
+            responseChannel.onError(new RejectedExecutionException(response.body.toString()));
             pendingRequests.remove(response.id);
             break;
           case "COMPLETION":

@@ -87,7 +87,7 @@ public class EntertainmentControlServer {
     }
 
     @SuppressWarnings("unchecked")
-    private void handleRequest(ApiRequest request) {
+    private <E> void handleRequest(ApiRequest<E> request) {
 
       // TODO check integrity of the request object:
       // - do the contents of the request match the operation signature?
@@ -100,15 +100,15 @@ public class EntertainmentControlServer {
       try {
         apiAdapter
             .invokeAsync(request.target)
-            .subscribe(new Responder(request, this::writeResponse));
+            .subscribe(new Responder<E>(request, this::writeResponse));
       } catch (Exception e) {
         System.out.println("Something went wrong while trying to invoke an ApiAdapter function");
         e.printStackTrace();
       }
     }
 
-    private void writeResponse(ApiResponse response) {
-      socket.writeFinalTextFrame(Json.encodePrettily(response));
+    private <E> void writeResponse(ApiResponse<E> response) {
+      socket.writeTextMessage(Json.encodePrettily(response));
     }
   }
 }

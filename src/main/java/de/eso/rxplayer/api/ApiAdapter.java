@@ -50,7 +50,7 @@ public final class ApiAdapter {
         return mockSubject.hide();
       case "/timer":
         BehaviorSubject<Long> subject = BehaviorSubject.create();
-        Vertx.vertx().setPeriodic(100, subject::onNext);
+        Vertx.vertx().setPeriodic(1_000, subject::onNext);
         return subject.hide();
       default:
         return translate(invocationTarget).call();
