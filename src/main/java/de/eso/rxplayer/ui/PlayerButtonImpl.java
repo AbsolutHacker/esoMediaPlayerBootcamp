@@ -1,6 +1,11 @@
 package de.eso.rxplayer.ui;
 
+import de.eso.rxplayer.api.ApiResponse;
+import de.eso.rxplayer.vertx.client.Launcher;
+import io.reactivex.Observable;
+
 import java.awt.event.ActionListener;
+
 
 class BackButton extends PlayerButton {
 
@@ -14,8 +19,9 @@ class BackButton extends PlayerButton {
         ActionListener[] actionListeners = new ActionListener[1];
         actionListeners[0] = e -> {
             System.out.println("BackButton pressed");
-//            ApiRequest apiRequest = new ApiRequest();
-//            getClient.sendapirequest
+            Launcher.getClient().subscribe(client -> {
+                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/back");
+            });
         };
         return actionListeners;
     }
@@ -32,7 +38,12 @@ class StopButton extends PlayerButton {
     @Override
     public ActionListener[] getActionListeners() {
         ActionListener[] actionListeners = new ActionListener[1];
-        actionListeners[0] = e -> System.out.println("StopButton pressed");
+        actionListeners[0] = e -> {
+            System.out.println("StopButton pressed");
+            Launcher.getClient().subscribe(client -> {
+                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/stop");
+            });
+        };
         return actionListeners;
     }
 }
@@ -48,7 +59,12 @@ class PlayButton extends PlayerButton {
     @Override
     public ActionListener[] getActionListeners() {
         ActionListener[] actionListeners = new ActionListener[1];
-        actionListeners[0] = e -> System.out.println("PlayButton pressed");
+        actionListeners[0] = e -> {
+            System.out.println("PlayButton pressed");
+            Launcher.getClient().subscribe(client -> {
+                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/play");
+            });
+        };
         return actionListeners;
     }
 }
@@ -64,7 +80,12 @@ class PauseButton extends PlayerButton {
     @Override
     public ActionListener[] getActionListeners() {
         ActionListener[] actionListeners = new ActionListener[1];
-        actionListeners[0] = e -> System.out.println("PauseButton pressed");
+        actionListeners[0] = e -> {
+            System.out.println("PauseButton pressed");
+            Launcher.getClient().subscribe(client -> {
+                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/pause");
+            });
+        };
         return actionListeners;
     }
 }
@@ -80,7 +101,12 @@ class ForwardButton extends PlayerButton {
     @Override
     public ActionListener[] getActionListeners() {
         ActionListener[] actionListeners = new ActionListener[1];
-        actionListeners[0] = e -> System.out.println("ForwardButton pressed");
+        actionListeners[0] = e -> {
+            System.out.println("ForwardButton pressed");
+            Launcher.getClient().subscribe(client -> {
+                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/forward");
+            });
+        };
         return actionListeners;
     }
 }
