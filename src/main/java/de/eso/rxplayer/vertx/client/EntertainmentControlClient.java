@@ -7,7 +7,6 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
@@ -16,8 +15,7 @@ public class EntertainmentControlClient {
 
   private final WebSocket socket;
   private int requestIndex = 128;
-  private final Map<Integer,BehaviorSubject<ApiResponse>> pendingRequests;
-
+  private final Map<Integer, BehaviorSubject<ApiResponse>> pendingRequests;
 
   public EntertainmentControlClient(WebSocket webSocket) {
     this.socket = webSocket;
@@ -26,9 +24,6 @@ public class EntertainmentControlClient {
 
   public void start() {
     socket.frameHandler(this::responseHandler);
-    // just a playful test request
-    newRequest("/browse/stations")
-    .subscribe(System.out::println);
   }
 
   public Observable<ApiResponse> request(ClientRequest request) {
@@ -53,6 +48,7 @@ public class EntertainmentControlClient {
 
     try {
 
+      System.out.println(frame.binaryData());
       // jsonify frame -> get ApiResponse object
       ApiResponse response = frame.binaryData().toJsonObject().mapTo(ApiResponse.class);
 
@@ -81,12 +77,10 @@ public class EntertainmentControlClient {
 
     } catch (DecodeException | IllegalArgumentException e) {
 
-      System.err.println("Received malformed response from server, discarding.\n>> " +
-              e.getMessage());
-//      e.printStackTrace();
+      System.err.println(
+          "Received malformed response from server, discarding.\n>> " + e.getMessage());
+      //      e.printStackTrace();
 
     }
-
   }
-
 }

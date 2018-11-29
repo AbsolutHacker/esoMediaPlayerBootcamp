@@ -7,11 +7,9 @@ public class Launcher {
 
   public static void main(String[] args) {
 
-    EntertainmentControlServer serverInstance = new EntertainmentControlServer(
-        MediaPlayerImpl.getInstance(),
-        MediaBrowserImpl.getInstance());
+    EntertainmentControlServer serverInstance =
+        new EntertainmentControlServer(
+            MediaPlayerImpl.getInstance(), MediaBrowserImpl.getInstance());
     serverInstance.start();
-
   }
-
 }
