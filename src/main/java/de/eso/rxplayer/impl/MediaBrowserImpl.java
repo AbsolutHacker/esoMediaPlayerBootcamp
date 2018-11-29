@@ -48,6 +48,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
 
     @Override
     public Observable<List<Album>> getAlbums(Set<Audio.Connection> searchScope) {
+        System.out.println("[Log] Started getAlbums");
         Observable<List<Track>> tracks$ = getAllTracksInScope(searchScope);
         return getAlbumsFromTracks(tracks$);
     }
@@ -126,30 +127,51 @@ public final class MediaBrowserImpl implements MediaBrowser {
 
 
         if (usbTracks$ == null) {
+            System.out.println("[Log] UsbTracklist null");
             usbTracks$ = Observable.empty();
         }
         if (cdTracks$ == null) {
+            System.out.println("[Log] CdTracklist null");
             cdTracks$ = Observable.empty();
         }
         if (radioTrack$ == null) {
+            System.out.println("[Log] RadioTracklist null");
             radioTrack$ = Observable.empty();
         }
 
-        Observable<List<Track>> radioTrackList = radioTrack$.map(track -> {
+        Observable<List<Track>> radioTrackList$ = radioTrack$.map(track -> {
             List<Track> tmpList = new ArrayList<>();
             tmpList.add(track);
+            System.out.println("[Log] Added track to ObservableRadioList " + track.getId());
             return tmpList;
         });
 
-        return Observable.concat(usbTracks$, cdTracks$, radioTrackList);
+        usbTracks$.forEach(tracks -> {
+           tracks.forEach(track -> System.out.println("[Log] usbTrack - " + track.getId()));
+        });
+        radioTrackList$.forEach(tracks -> {
+            tracks.forEach(track -> System.out.println("[Log] radioTrack - " + track.getId()));
+        });
+        cdTracks$.forEach(tracks -> {
+            tracks.forEach(track -> System.out.println("[Log] cdTrack - " + track.getId()));
+        });
+
+        return Observable.concat(usbTracks$, cdTracks$, radioTrackList$);
     }
 
 
     private Observable<List<Album>> getAlbumsFromTracks(Observable<List<Track>> obsTracks$) {
+        System.out.println("[Log] Started getAlbumsFromTracks");
+        obsTracks$.forEach(tracks -> {
+            System.out.println("[Log] Try to get album from these tracks (only first) " + tracks.get(0));
+        });
         Observable<List<Integer>> albumIds$ = obsTracks$
                 .map(tracks -> tracks
                         .stream()
-                        .map(Track::getAlbumId)
+                        .map(track -> {
+                            System.out.println("[Log] added trackId to ObservableAlbumIds " + track.getAlbumId());
+                            return track.getAlbumId();
+                        })
                         .distinct()
                         .collect(Collectors.toList())
                 );
@@ -159,7 +181,10 @@ public final class MediaBrowserImpl implements MediaBrowser {
                     .map(id -> es.getBrowser().albumById(id))
                     .collect(Collectors.toList());
             return Single.zip(singleList, array -> {
-                return Arrays.asList((Album[]) array);
+                Album[] albumArray = Arrays.stream(array).toArray(Album[]::new);
+                List<Album> albums = Arrays.asList(albumArray);
+                System.out.println("[Log] Got album from Single " + albums.get(0).getId());
+                return albums;
             });
         });
 
