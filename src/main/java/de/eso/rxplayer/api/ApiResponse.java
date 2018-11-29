@@ -3,10 +3,9 @@ package de.eso.rxplayer.api;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
-public class ApiResponse {
+public class ApiResponse<E> {
   /**
    * Response identifier number: This ID is identical to the ID of the ApiRequest that caused this
    * ApiResponse. Since a single ApiRequest can cause multiple ApiResponses to be sent, it is <b>not
@@ -19,7 +18,7 @@ public class ApiResponse {
   /** The response <b>type</b>. */
   public final String response;
 
-  public final Map<String, Object> params;
+  public final List<E> body;
 
   /**
    * Unsafe constructor accepting a given ID (request reference).
@@ -30,18 +29,18 @@ public class ApiResponse {
    * @throws IllegalArgumentException
    */
   @JsonIgnore
-  ApiResponse(int id, Type responseType, Map<String, Object> body) {
+  ApiResponse(int id, Type responseType, List<E> body) {
     if (responseType == null)
       throw new IllegalArgumentException(
           "ApiResponse(): responseType required, given: " + responseType);
 
     this.id = id;
     this.response = responseType.toString();
-    this.params = (body == null) ? Collections.emptyMap() : body;
+    this.body = body;
   }
 
   @JsonIgnore
-  public ApiResponse(ApiRequest reference, Type responseType, Map<String, Object> body) {
+  public ApiResponse(ApiRequest reference, Type responseType, List<E> body) {
     this(reference.id, responseType, body);
   }
 
@@ -49,7 +48,7 @@ public class ApiResponse {
   public ApiResponse(
       @JsonProperty("id") int id,
       @JsonProperty("response") String responseType,
-      @JsonProperty("params") Map<String, Object> params) {
+      @JsonProperty("body") List<E> params) {
     this(id, Type.valueOf(responseType), params);
   }
 

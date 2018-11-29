@@ -4,16 +4,18 @@ import de.eso.rxplayer.api.ApiRequest;
 import de.eso.rxplayer.api.ApiResponse;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
-public class Responder implements Observer {
+public class Responder<E> implements Observer<E> {
 
   private final ApiRequest request;
-  private final Consumer<ApiResponse> responseHandler;
+  private final Consumer<ApiResponse<E>> responseHandler;
   private Disposable resourceSubscription;
 
-  public Responder(ApiRequest request, Consumer<ApiResponse> responseHandler) {
+  public Responder(ApiRequest request, Consumer<ApiResponse<E>> responseHandler) {
     this.request = request;
     this.responseHandler = responseHandler;
   }
@@ -24,18 +26,16 @@ public class Responder implements Observer {
   }
 
   @Override
-  public void onNext(Object o) {
+  public void onNext(E o) {
     // jsonify the object
     // write it to a frame
     responseHandler.accept(
-        new ApiResponse(
+        new ApiResponse<E>(
             request,
             ApiResponse.Type.SUCCESS,
-            new HashMap<String, Object>() {
-              {
-                put("timer_id", o);
-              }
-            }));
+            new ArrayList<E>(){{
+              add(o);
+            }}));
   }
 
   @Override
@@ -44,22 +44,17 @@ public class Responder implements Observer {
     // go ask somebody..
     resourceSubscription.dispose();
     responseHandler.accept(
-        new ApiResponse(
+        new ApiResponse<E>(
             request,
             ApiResponse.Type.ERROR,
-            new HashMap<String, Object>() {
-              {
-                put("message", e.getMessage());
-                put("cause", e.getCause());
-              }
-            }));
+            null));
     e.printStackTrace();
     throw new AssertionError("Encountered unhandled Throwable " + e);
   }
 
   @Override
   public void onComplete() {
-    responseHandler.accept(new ApiResponse(request, ApiResponse.Type.COMPLETION, null));
+    responseHandler.accept(new ApiResponse<E>(request, ApiResponse.Type.COMPLETION, null));
     resourceSubscription.dispose();
   }
 }

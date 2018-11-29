@@ -21,12 +21,5 @@ public class Launcher {
   public static void main(String[] args) {
     EntertainmentControlClient clientInstance = getClient().blockingGet();
     clientInstance.start();
-    // just a playful test request
-    clientInstance
-        .newRequest("/browse/sources")
-        .subscribe(
-            response -> {
-              System.err.println(Json.encodePrettily(response));
-            });
   }
 }
