@@ -1,17 +1,17 @@
 package de.eso.rxplayer.ui;
 
-import javax.swing.*;
 import java.awt.event.ActionListener;
+import javax.swing.*;
 
 abstract class PlayerButton extends JButton {
-    PlayerButton() {
-        this.setText(getText());
-        this.addActionListener(getActionListeners()[0]);
-    }
+  PlayerButton() {
+    this.setText(getText());
+    this.addActionListener(getActionListeners()[0]);
+  }
 
-    @Override
-    abstract public String getText();
+  @Override
+  public abstract String getText();
 
-    @Override
-    abstract public ActionListener[] getActionListeners();
+  @Override
+  public abstract ActionListener[] getActionListeners();
 }
