@@ -89,14 +89,10 @@ public class EntertainmentControlServer {
                 // eating the exception
                 System.out.println("Yum-yum-yum, tasty exception...");
                 System.err.println(LocalDateTime.now() + " Failed to parse client request, ignoring");
-//                e.getCause().printStackTrace();
+                e.getCause().printStackTrace();
             }
 
-
-
             // TODO check integrity of the request object:
-            // - does it have an id?
-            // - does it map to a valid operation?
             // - do the contents of the request match the operation signature?
 
             // TODO call the operation with the given arguments
@@ -106,6 +102,9 @@ public class EntertainmentControlServer {
         }
 
         private void handleRequest(ApiRequest request) {
+            // log for my personal amusement
+            System.out.println(Json.encodePrettily(request));
+
             Observable
                 .just(
                     new ApiResponse(

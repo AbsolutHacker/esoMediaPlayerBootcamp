@@ -1,5 +1,7 @@
 package de.eso.rxplayer.api;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Map;
 
 /**
@@ -36,13 +38,14 @@ public class ApiRequest {
 
   private Type type;
 
-
+  @JsonIgnore
   public boolean isValid() {
     if (type == null)
       checkType();
     return (type != Type.INVALID);
   }
 
+  @JsonIgnore
   public Type getType() {
     if (type == null)
       checkType();
