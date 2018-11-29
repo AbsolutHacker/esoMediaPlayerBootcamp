@@ -27,7 +27,7 @@ public class EntertainmentControlClient {
   public void start() {
     socket.frameHandler(this::responseHandler);
     // just a playful test request
-    newRequest("/browse/albums")
+    newRequest("/browse/stations")
     .subscribe(System.out::println);
   }
 
