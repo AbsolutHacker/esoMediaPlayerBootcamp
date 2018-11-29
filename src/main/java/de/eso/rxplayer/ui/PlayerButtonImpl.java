@@ -21,6 +21,9 @@ class BackButton extends PlayerButton {
             System.out.println("BackButton pressed");
             Launcher.getClient().subscribe(client -> {
                 Observable<ApiResponse> apiResponse$ = client.newRequest("/play/back");
+                apiResponse$.subscribe(apiResponse -> {
+
+                });
             });
         };
         return actionListeners;
@@ -49,42 +52,37 @@ class StopButton extends PlayerButton {
 }
 
 
-class PlayButton extends PlayerButton {
+class PlayPauseButton extends PlayerButton {
+
+    private boolean isPlayMode = true; //if button press equals to play or pause
+    private String buttonText = "PLAY";
 
     @Override
     public String getText() {
-        return "PLAY";
+        return buttonText;
     }
 
     @Override
     public ActionListener[] getActionListeners() {
         ActionListener[] actionListeners = new ActionListener[1];
         actionListeners[0] = e -> {
-            System.out.println("PlayButton pressed");
-            Launcher.getClient().subscribe(client -> {
-                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/play");
-            });
-        };
-        return actionListeners;
-    }
-}
 
+            if (isPlayMode) {
+                System.out.println("PlayButton pressed");
+                isPlayMode = false;
+                buttonText = "PLAY";
+                Launcher.getClient().subscribe(client -> {
+                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/play");
+                });
 
-class PauseButton extends PlayerButton {
-
-    @Override
-    public String getText() {
-        return "PAUSE";
-    }
-
-    @Override
-    public ActionListener[] getActionListeners() {
-        ActionListener[] actionListeners = new ActionListener[1];
-        actionListeners[0] = e -> {
-            System.out.println("PauseButton pressed");
-            Launcher.getClient().subscribe(client -> {
-                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/pause");
-            });
+            } else {
+                System.out.println("PauseButton pressed");
+                isPlayMode = true;
+                buttonText = "PAUSE";
+                Launcher.getClient().subscribe(client -> {
+                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/pause");
+                });
+            }
         };
         return actionListeners;
     }
