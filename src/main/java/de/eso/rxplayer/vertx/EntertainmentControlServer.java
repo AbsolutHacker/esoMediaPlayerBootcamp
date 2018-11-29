@@ -1,10 +1,10 @@
 package de.eso.rxplayer.vertx;
 
-import de.eso.rxplayer.api.ApiRequest;
-import de.eso.rxplayer.api.ApiResponse;
-import de.eso.rxplayer.api.MediaBrowser;
-import de.eso.rxplayer.api.MediaPlayer;
+import de.eso.rxplayer.Album;
+import de.eso.rxplayer.api.*;
 import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.disposables.Disposable;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
@@ -16,7 +16,9 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 public class EntertainmentControlServer {
 
@@ -24,11 +26,13 @@ public class EntertainmentControlServer {
 
     private final MediaPlayer mediaPlayer;
     private final MediaBrowser mediaBrowser;
+    private final ApiAdapter apiAdapter;
     private final Vertx vertx;
 
     EntertainmentControlServer(MediaPlayer mediaPlayer, MediaBrowser mediaBrowser) {
         this.mediaPlayer = mediaPlayer;
         this.mediaBrowser = mediaBrowser;
+        this.apiAdapter = new ApiAdapter(mediaPlayer, mediaBrowser);
         this.vertx = Vertx.vertx();
     }
 
@@ -86,11 +90,38 @@ public class EntertainmentControlServer {
                     }
                 }
             } catch (DecodeException | IllegalArgumentException e) {
-                // eating the exception
-                System.out.println("Yum-yum-yum, tasty exception...");
                 System.err.println(LocalDateTime.now() + " Failed to parse client request, ignoring");
                 e.getCause().printStackTrace();
             }
+
+        }
+
+        private class Responder implements Observer {
+
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onNext(Object o) {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onComplete() {
+
+            }
+
+        }
+        private void handleRequest(ApiRequest request) {
+            // log for my personal amusement
+            System.out.println(Json.encodePrettily(request));
 
             // TODO check integrity of the request object:
             // - do the contents of the request match the operation signature?
@@ -99,11 +130,28 @@ public class EntertainmentControlServer {
 
             //      if the operation returns an observable,
             // TODO subscribe the response handler to that observable
-        }
 
-        private void handleRequest(ApiRequest request) {
-            // log for my personal amusement
-            System.out.println(Json.encodePrettily(request));
+            try {
+                Callable<Observable> c =
+                apiAdapter.translate(request.params.get("target").toString());
+                System.out.println("ApiAdapter#translate returned " + c);
+//                c
+//                    .call()
+//                    .map(list -> {
+//                        System.out.println(list);
+//                     return   new ApiResponse(
+//                            request,
+//                            ApiResponse.Type.SUCCESS,
+//                            new HashMap<String, Object>() {{
+//                                put("params", Json.encodePrettily(list));
+//                            }}
+//                        );
+//                    })
+//                    .subscribe(this::writeResponse);
+            } catch (Exception e) {
+                System.out.println("Something went wrong while trying to invoke an ApiAdapter function");
+                e.printStackTrace();
+            }
 
             Observable
                 .just(
@@ -113,11 +161,11 @@ public class EntertainmentControlServer {
                         new HashMap<>()
                     )
                 )
-                .subscribe(this::handleResponse)
+                .subscribe(this::writeResponse)
             ;
         }
 
-        private void handleResponse(ApiResponse response) {
+        private void writeResponse(ApiResponse response) {
             socket.writeFinalTextFrame(Json.encodePrettily(response));
         }
 
