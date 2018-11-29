@@ -4,7 +4,6 @@ import de.eso.rxplayer.Album;
 import de.eso.rxplayer.Audio;
 import de.eso.rxplayer.Station;
 import de.eso.rxplayer.Track;
-import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -35,67 +34,57 @@ class MediaBrowserImplTest {
 
     @Test
     void getAlbums() throws InterruptedException {
-        List<Album> availableAlbums = getAvailableAlbums();
         MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
 
         TestObserver<List<Album>> albums$ = mediaBrowser.getAlbums().test();
         Thread.sleep(2000);
-        albums$.assertValueAt(0, list -> list.contains(availableAlbums.get(0)));
-    }
-
-//    @Test
-    void searchAlbum() {
-        List<Album> availableAlbums = getAvailableAlbums();
-        MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
-
-        Observable<List<Album>> albums$ = mediaBrowser.searchAlbum("Fetty Wap");
-        albums$.subscribe(albums -> albums.forEach(album -> {
-            assertTrue(availableAlbums.contains(album));
-            availableAlbums.remove(album);
-        }));
-
-        assertTrue(availableAlbums.size() == 0);
-    }
-
-//    @Test
-    void searchTrack() {
-        List<Track> availableTracks = getAvailAbleTracks();
-        MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
-
-        Observable<List<Track>> tracks$ = mediaBrowser.searchTrack("Trap Queen");
-        tracks$.subscribe(tracks -> tracks.forEach(track -> {
-            assertTrue(availableTracks.contains(track));
-            availableTracks.remove(track);
-        }));
-
-        assertTrue(availableTracks.size() == 0);
-    }
-
-//    @Test
-    void getAlbumTracks() {
-        List<Track> availableTracks = getAvailAbleTracks();
-        MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
-
-        Observable<List<Track>> tracks$ = mediaBrowser.getAlbumTracks(getAvailableAlbums().get(0));
-        tracks$.subscribe(tracks -> tracks.forEach(track -> {
-            assertTrue(availableTracks.contains(track));
-            availableTracks.remove(track);
-        }));
-
-        assertTrue(availableTracks.size() == 0);
+        albums$.assertValueAt(0, list -> list.contains(getAvailableAlbums().get(0)));
     }
 
     @Test
-    void getStations() {
-        List<Station> knownStations = new ArrayList<>();
-
+    void searchAlbum() throws InterruptedException {
         MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
-        mediaBrowser.getStations().subscribe(stations -> stations.forEach(station -> {
-            assertTrue(knownStations.contains(station));
-            knownStations.remove(station); //remove the found station
-        }));
 
-        assertTrue(knownStations.size() == 0); //every known station should have been found and deleted
+        TestObserver<List<Album>> albums$ = mediaBrowser.searchAlbum("Fetty Wap").test();
+        Thread.sleep(2000);
+        albums$.assertValueAt(0, albums -> albums.get(0).equals(getAvailableAlbums().get(0)));
+    }
+
+    @Test
+    void searchTrack() throws InterruptedException {
+        MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
+
+        TestObserver<List<Track>> tracks$ = mediaBrowser.searchTrack("Trap Queen").test();
+        Thread.sleep(2000);
+        tracks$.assertValueAt(0, tracks -> tracks.get(0).equals(getAvailAbleTracks().get(0)));
+    }
+
+    @Test
+    void getAlbumTracks() throws InterruptedException {
+        MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
+
+        TestObserver<List<Track>> tracks$ = mediaBrowser.getAlbumTracks(getAvailableAlbums().get(0)).test();
+        Thread.sleep(2000);
+        tracks$.assertValueAt(0, tracks -> tracks.get(0).equals(getAvailAbleTracks().get(0)));
+    }
+
+    @Test
+    void getStations() throws InterruptedException {
+        List<Station> knownStations = new ArrayList<>(); //radio was never built in, we don't know a single station to test
+        MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
+
+        TestObserver<List<Station>> stations$ = mediaBrowser.getStations().test();
+        Thread.sleep(1000);
+
+        if (!mediaBrowser.getGlobalSearchScope().contains(Audio.Connection.RADIO)) { //no radio built in
+            stations$.assertNoValues();
+
+        } else {
+            stations$.assertValueAt(0, stations ->
+                    stations.size() == 0 ||
+                    stations.get(0).equals(knownStations.get(0))
+            );
+        }
     }
 
     @NotNull
