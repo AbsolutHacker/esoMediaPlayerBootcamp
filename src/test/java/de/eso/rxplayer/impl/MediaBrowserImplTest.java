@@ -38,7 +38,12 @@ class MediaBrowserImplTest {
         MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
 
         Observable<List<Album>> albums$ = mediaBrowser.getAlbums();
-        albums$.subscribe(albums -> albums.forEach(album -> assertTrue(availableAlbums.contains(album))));
+        albums$.subscribe(albums -> albums.forEach(album -> {
+            assertTrue(availableAlbums.contains(album));
+            availableAlbums.remove(album);
+        }));
+
+        assertTrue(availableAlbums.size() == 0);
     }
 
     @Test
@@ -47,7 +52,12 @@ class MediaBrowserImplTest {
         MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
 
         Observable<List<Album>> albums$ = mediaBrowser.searchAlbum("Fetty Wap");
-        albums$.subscribe(albums -> albums.forEach(album -> assertTrue(availableAlbums.contains(album))));
+        albums$.subscribe(albums -> albums.forEach(album -> {
+            assertTrue(availableAlbums.contains(album));
+            availableAlbums.remove(album);
+        }));
+
+        assertTrue(availableAlbums.size() == 0);
     }
 
     @Test
@@ -56,7 +66,12 @@ class MediaBrowserImplTest {
         MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
 
         Observable<List<Track>> tracks$ = mediaBrowser.searchTrack("Trap Queen");
-        tracks$.subscribe(tracks -> tracks.forEach(track -> assertTrue(availableTracks.contains(track))));
+        tracks$.subscribe(tracks -> tracks.forEach(track -> {
+            assertTrue(availableTracks.contains(track));
+            availableTracks.remove(track);
+        }));
+
+        assertTrue(availableTracks.size() == 0);
     }
 
     @Test
@@ -65,7 +80,12 @@ class MediaBrowserImplTest {
         MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
 
         Observable<List<Track>> tracks$ = mediaBrowser.getAlbumTracks(getAvailableAlbums().get(0));
-        tracks$.subscribe(tracks -> tracks.forEach(track -> assertTrue(availableTracks.contains(track))));
+        tracks$.subscribe(tracks -> tracks.forEach(track -> {
+            assertTrue(availableTracks.contains(track));
+            availableTracks.remove(track);
+        }));
+
+        assertTrue(availableTracks.size() == 0);
     }
 
     @Test
