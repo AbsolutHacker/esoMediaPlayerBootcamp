@@ -10,6 +10,7 @@ import io.vertx.core.json.Json;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 
 public class EntertainmentControlClient {
 
@@ -25,16 +26,12 @@ public class EntertainmentControlClient {
 
   public void start() {
     socket.frameHandler(this::responseHandler);
-    newRequest(
-        new ClientRequest(requestIndex++, "getAvailableSources")
-      )
-    .subscribe(response -> {
-      System.out.println("Congratulations, super awesome Rx-i-ness!");
-      System.err.println(Json.encodePrettily(response));
-    });
+    // just a playful test request
+    newRequest("/browse/albums")
+    .subscribe(System.out::println);
   }
 
-  public Observable<ApiResponse> newRequest(ClientRequest request) {
+  public Observable<ApiResponse> request(ClientRequest request) {
     // create an Observable
     BehaviorSubject<ApiResponse> responseChannel = BehaviorSubject.create();
 
@@ -48,12 +45,11 @@ public class EntertainmentControlClient {
     return responseChannel.hide();
   }
 
-  private void responseHandler(WebSocketFrame frame) {
+  public Observable<ApiResponse> newRequest(String singleMethodToInvoke) {
+    return request(new ClientRequest(requestIndex++, singleMethodToInvoke));
+  }
 
-    // log, if anybody wants to see our private data
-    System.out.println(frame.isText()
-        ? frame.textData()
-        : "Binary frame, length() = " + frame.binaryData().length());
+  private void responseHandler(WebSocketFrame frame) {
 
     try {
 
@@ -63,13 +59,24 @@ public class EntertainmentControlClient {
       // lookup the responseChannel from the /pending/ map
       BehaviorSubject<ApiResponse> responseChannel = pendingRequests.get(response.id);
 
-      // notify its subscribers
-      if (responseChannel != null)
-        responseChannel.onNext(response);
-
-      // if the response was an error or completion, notify its subscribers
-      switch (response.response) {
-        // TODO just do something.. anything.
+      // notify the response's subscribers if the request was successful;
+      // if it was an error or completion, notify its subscribers and discard
+      // the response channel object
+      if (responseChannel != null) {
+        switch (response.response) {
+          case "ERROR":
+            responseChannel.onError(new RejectedExecutionException(response.params.toString()));
+            pendingRequests.remove(response.id);
+            break;
+          case "COMPLETION":
+            responseChannel.onComplete();
+            pendingRequests.remove(response.id);
+            break;
+          case "SUCCESS":
+            responseChannel.onNext(response);
+            break;
+          default:
+        }
       }
 
     } catch (DecodeException | IllegalArgumentException e) {
