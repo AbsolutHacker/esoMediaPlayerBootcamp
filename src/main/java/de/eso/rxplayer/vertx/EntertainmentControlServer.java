@@ -22,14 +22,17 @@ public class EntertainmentControlServer {
   private final ApiAdapter apiAdapter;
   private final Vertx vertx;
 
-  EntertainmentControlServer(MediaPlayer mediaPlayer, MediaBrowser mediaBrowser) {
+  public EntertainmentControlServer(MediaPlayer mediaPlayer, MediaBrowser mediaBrowser) {
     this.apiAdapter = new ApiAdapter(mediaPlayer, mediaBrowser);
     this.vertx = Vertx.vertx();
   }
 
-  void start() {
+  public void start() {
     vertx
-        .createHttpServer(new HttpServerOptions().setLogActivity(true))
+        .createHttpServer(new HttpServerOptions()
+            .setLogActivity(true)
+            .setMaxWebsocketFrameSize(1_048_576)
+        )
         .requestHandler(this::httpRequestHandler)
         .websocketHandler(this::webSocketHandler)
         .listen(DEFAULT_LISTEN_PORT);
