@@ -157,14 +157,14 @@ public class MediaPlayerDisplay extends JFrame {
     public ImageIcon getDefaultCover() {
         BufferedImage myPicture = null;
         try {
-            myPicture = ImageIO.read(new File("https://s.discogs.com/images/default-release-cd.png"));
+            myPicture = ImageIO.read(new File("src/main/resources/defaultCover.png"));
         } catch (IOException e) {
 
         }
 
         ImageIcon image;
         if (myPicture == null) {
-            image = getDefaultCover();
+            return null; //this really shouldn't happen
         } else {
             image = new ImageIcon(myPicture);
         }
