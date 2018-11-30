@@ -3,7 +3,6 @@ package de.eso.rxplayer.api;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.List;
 
 public class ApiResponse<E> {

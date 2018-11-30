@@ -7,11 +7,10 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
-import org.jetbrains.annotations.NotNull;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
+import org.jetbrains.annotations.NotNull;
 
 public class EntertainmentControlClient {
 
@@ -42,7 +41,8 @@ public class EntertainmentControlClient {
     return responseChannel.hide();
   }
 
-  public Observable<ApiResponse> newRequest(String singleMethodToInvoke, Class<?> expectedReturnType) {
+  public Observable<ApiResponse> newRequest(
+      String singleMethodToInvoke, Class<?> expectedReturnType) {
     return request(new ClientRequest(requestIndex++, singleMethodToInvoke, expectedReturnType));
   }
 

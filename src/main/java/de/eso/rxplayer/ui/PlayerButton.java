@@ -6,22 +6,22 @@ import java.awt.event.ActionListener;
 
 abstract class PlayerButton extends JButton {
 
-    PlayerButton() {
-        this.changeLanguage(Language.getDefaultLanguage());
-        this.setText(getText());
-        this.addActionListener(getActionListeners()[0]);
-        this.setStyling(ColorTheme.getDefaultColorTheme());
-    }
+  PlayerButton() {
+    this.changeLanguage(Language.getDefaultLanguage());
+    this.setText(getText());
+    this.addActionListener(getActionListeners()[0]);
+    this.setStyling(ColorTheme.getDefaultColorTheme());
+  }
 
-    abstract void changeLanguage(Language language);
+  abstract void changeLanguage(Language language);
 
-    public void setStyling(ColorTheme colorTheme) {
-        this.setBackground(new Color(colorTheme.getHexCode()));
-    }
+  public void setStyling(ColorTheme colorTheme) {
+    this.setBackground(new Color(colorTheme.getHexCode()));
+  }
 
-    @Override
-    abstract public String getText();
+  @Override
+  public abstract String getText();
 
-    @Override
-    abstract public ActionListener[] getActionListeners();
+  @Override
+  public abstract ActionListener[] getActionListeners();
 }

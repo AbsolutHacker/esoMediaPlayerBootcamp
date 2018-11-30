@@ -10,7 +10,10 @@ public class ClientRequest extends ApiRequest {
 
   @SuppressWarnings("unchecked")
   public ClientRequest(
-      final int id, final Type type, final String target, final Map<String, ?> params,
+      final int id,
+      final Type type,
+      final String target,
+      final Map<String, ?> params,
       final Class<?> expectedReturnType) {
     this.id = id;
     this.request = type.toString();
@@ -20,7 +23,8 @@ public class ClientRequest extends ApiRequest {
     this.params = (Map<String, Object>) params;
   }
 
-  public ClientRequest(final int id, final Type type, String singleMethodToInvoke, Class<?> returnType) {
+  public ClientRequest(
+      final int id, final Type type, String singleMethodToInvoke, Class<?> returnType) {
     this(id, type, singleMethodToInvoke, new HashMap<String, Object>(), returnType);
   }
 
