@@ -71,23 +71,23 @@ public class MediaPlayerDisplay extends JFrame {
 
   private class createTrackInformationPanel extends JPanel {
     createTrackInformationPanel() {
+      super(new BorderLayout());
+
       final JLabel trackTitleLabel;
       final JLabel trackArtistLabel;
       final JLabel trackAlbumLabel;
 
-      JPanel trackInformationPanel = new JPanel(new GridLayout(3, 1));
-
       trackTitleLabel = new JLabel(RESET_TITLE, SwingConstants.CENTER);
       trackTitleLabel.setFont(font.deriveFont(12.0f));
-      trackInformationPanel.add(trackTitleLabel, BorderLayout.NORTH);
+      add(trackTitleLabel, BorderLayout.NORTH);
 
-      trackArtistLabel = new JLabel(RESET_TITLE, SwingConstants.CENTER);
+      trackArtistLabel = new JLabel(RESET_ARTIST, SwingConstants.CENTER);
       trackArtistLabel.setFont(font.deriveFont(12.0f));
-      trackInformationPanel.add(trackTitleLabel, BorderLayout.CENTER);
+      add(trackArtistLabel, BorderLayout.CENTER);
 
-      trackAlbumLabel = new JLabel(RESET_TITLE, SwingConstants.CENTER);
+      trackAlbumLabel = new JLabel(RESET_ALBUM, SwingConstants.CENTER);
       trackAlbumLabel.setFont(font.deriveFont(12.0f));
-      trackInformationPanel.add(trackTitleLabel, BorderLayout.SOUTH);
+      add(trackAlbumLabel, BorderLayout.SOUTH);
     }
   }
 
