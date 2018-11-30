@@ -2,6 +2,7 @@ package de.eso.rxplayer.impl;
 
 import de.eso.rxplayer.*;
 import de.eso.rxplayer.Audio.AudioState;
+import de.eso.rxplayer.Audio.Connection;
 import de.eso.rxplayer.api.MediaPlayer;
 import io.reactivex.Completable;
 import io.reactivex.subjects.ReplaySubject;
@@ -11,11 +12,11 @@ import kotlin.NotImplementedError;
 /** MediaPlayer with all its buttons and functionality for the user to control the player */
 public final class MediaPlayerImpl implements MediaPlayer {
   private static MediaPlayerImpl mediaPlayer;
-  private static final Audio.Connection DEFAULT_SOURCE = Audio.Connection.CD;
+  private static final Connection DEFAULT_SOURCE = Connection.CD;
   private Player player = null;
   private Radio radio = null;
   private int lastRadioStation = 0;
-  private Audio.Connection currentSource;
+  private Connection currentSource;
   private AudioState currentState = AudioState.STOPPED;
   private Subject<ServerEvents> playSubject;
   private Integer currentTrackId = 0;
@@ -65,6 +66,17 @@ public final class MediaPlayerImpl implements MediaPlayer {
   public void previous() {
     System.out.println("press previous");
     playSubject.onNext(ServerEvents.PREV);
+  }
+
+  /**
+   * select a new source and stop the current started source
+   *
+   * @param source audio source
+   */
+  @Override
+  public void selectSource(Connection source){
+    ServerEvents.CHANGESRC.setSource(source);
+    playSubject.onNext(ServerEvents.CHANGESRC);
   }
 
   /** takes all events that will be invoke from outside filter repeated events */
@@ -134,6 +146,17 @@ public final class MediaPlayerImpl implements MediaPlayer {
                       });
               break;
             case CHANGESRC:
+              selectSourceInner(event.getSource())
+                        .subscribe(
+                    () -> {
+                      System.out.println("switch source complete");
+                      System.out.println(" ");
+                    },
+                    throwable -> {
+                      System.out.println("switch source failed");
+                      System.out.println(" ");
+                      throwable.printStackTrace();
+                    });
               break;
           }
         });
@@ -160,7 +183,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
         case STOPPED:
           return Completable.fromAction(() -> es.getAudio().start(currentSource));
         case STARTING:
-          return Completable.error(() -> new Exception("Wrong state for execute play"));
+          return Completable.complete();
         case STARTED:
           startsPlaying =
               player
@@ -181,7 +204,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
                       });
           break;
         case STOPPING:
-          return Completable.error(() -> new Exception("Wrong state for execute play"));
+          return Completable.complete();
       }
     }
     return startsPlaying;
@@ -207,10 +230,10 @@ public final class MediaPlayerImpl implements MediaPlayer {
       switch (currentState) {
         case STOPPED:
           System.out.println("pause -> STOPPED");
-          return Completable.error(() -> new Exception("Wrong state for execute pause"));
+          return Completable.complete();
         case STARTING:
           System.out.println("pause -> STARTING");
-          return Completable.error(() -> new Exception("Wrong state for execute pause"));
+          return Completable.complete();
         case STARTED:
           System.out.println("pause -> STARTED");
           startsPlaying =
@@ -230,7 +253,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
           break;
         case STOPPING:
           System.out.println("pause -> STOPPING");
-          return Completable.error(() -> new Exception("Wrong state for execute play"));
+          return Completable.complete();
       }
     }
     return startsPlaying;
@@ -324,32 +347,19 @@ public final class MediaPlayerImpl implements MediaPlayer {
             });
   }
 
-  /**
-   * select a new source and stop the current started source
-   *
-   * @param source audio source
-   */
-  @Override
-  public void selectSource(Audio.Connection source) {
+
+  private Completable selectSourceInner(Connection source) {
     System.out.println("press selectSource");
     if (currentSource == null) {
       System.out.println("select new source");
       manageSources(source);
+      return Completable.complete();
     } else if (currentSource != source) {
       System.out.println("switch source");
-      stopInner()
-          .subscribe(
-              () -> {
-                manageSources(source);
-                System.out.println("switch source complete");
-                System.out.println(" ");
-              },
-              throwable -> {
-                System.out.println("switch source failed");
-                System.out.println(" ");
-                throwable.printStackTrace();
-              });
+     return stopInner()
+             .doOnComplete(() -> manageSources(source));
     }
+    return Completable.complete();
   }
 
   /**
@@ -357,7 +367,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
    *
    * @param source
    */
-  private void manageSources(Audio.Connection source) {
+  private void manageSources(Connection source) {
     System.out.println("call manageSources");
     EntertainmentService es = myEntertainmentService.getEntertainmentService();
     es.getAudio()
@@ -382,9 +392,9 @@ public final class MediaPlayerImpl implements MediaPlayer {
                   System.out.println(
                       "manageSources:  STARTING -> " + state.name() + " -> " + "Nothing happens");
                   break;
-                default:
+                case STOPPING:
                   System.out.println(
-                      "manageSources:  DEFAULT -> " + state.name() + " -> " + "Nothing happens");
+                      "manageSources:  STOPPING -> " + state.name() + " -> " + "Nothing happens");
               }
             });
   }
@@ -394,24 +404,22 @@ public final class MediaPlayerImpl implements MediaPlayer {
    *
    * @param source audio source
    */
-  private void changeSource(Audio.Connection source) {
+  private void changeSource(Connection source) {
     System.out.println("call changeSource");
     EntertainmentService es = myEntertainmentService.getEntertainmentService();
     try {
       if (currentSource != source) {
+        System.out.println("changed source to -> " + source.name());
         switch (source) {
           case USB:
-            System.out.println("changed source to -> " + source.name());
             radio = null;
             player = es.getUsb();
             break;
           case CD:
-            System.out.println("changed source to -> " + source.name());
             radio = null;
             player = es.getCd();
             break;
           case RADIO:
-            System.out.println("changed source to -> " + source.name());
             player = null;
             radio = es.getFm();
             radio.select(lastRadioStation);
@@ -443,7 +451,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
     try {
       Integer ms = 2100;
       MediaPlayerImpl mp = MediaPlayerImpl.getInstance();
-      mp.selectSource(Audio.Connection.CD);
+      mp.selectSource(Connection.CD);
       Thread.sleep(4000);
       mp.play();
       Thread.sleep(ms);
@@ -479,11 +487,27 @@ public final class MediaPlayerImpl implements MediaPlayer {
   }
 
   private enum ServerEvents {
-    PLAY,
-    PAUSE,
-    STOP,
-    NEXT,
-    PREV,
-    CHANGESRC
+    PLAY(Connection.USB),
+    PAUSE(Connection.USB),
+    STOP(Connection.USB),
+    NEXT(Connection.USB),
+    PREV(Connection.USB),
+    CHANGESRC(Connection.USB);
+
+    private Connection source;
+
+
+    ServerEvents(Connection source) {
+      this.source = source;
+    }
+
+    public void setSource(Connection source) {
+      this.source = source;
+    }
+
+    public Connection getSource()
+    {
+      return source;
+    }
   }
 }
