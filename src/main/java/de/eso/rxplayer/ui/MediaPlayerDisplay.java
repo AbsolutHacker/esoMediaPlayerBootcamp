@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -145,7 +146,8 @@ public class MediaPlayerDisplay extends JFrame {
   public void setCoverImage(String path) {
     BufferedImage myPicture = null;
     try {
-      myPicture = ImageIO.read(new File(path));
+      URL url = new URL(path);
+      myPicture = ImageIO.read(url);
     } catch (IOException e) {
       System.out.println("[WARNING] CoverImage not found!");
     }
