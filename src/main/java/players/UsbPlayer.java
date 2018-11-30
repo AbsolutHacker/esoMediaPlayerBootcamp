@@ -4,22 +4,18 @@ import de.eso.rxplayer.*;
 
 public class UsbPlayer {
 
-    Player usbService;
+  Player usbService;
 
-    Browser browserService;
+  Browser browserService;
 
-    Audio audioService;
+  Audio audioService;
 
-    UsbPlayer(){
-        EntertainmentService entertainmentService = myEntertainmentService.getEntertainmentService();
-        usbService = entertainmentService.getUsb();
-        browserService = entertainmentService.getBrowser();
-        audioService = entertainmentService.getAudio();
-    }
+  UsbPlayer() {
+    EntertainmentService entertainmentService = myEntertainmentService.getEntertainmentService();
+    usbService = entertainmentService.getUsb();
+    browserService = entertainmentService.getBrowser();
+    audioService = entertainmentService.getAudio();
+  }
 
-
-
-    public static void main(String[] args) {
-
-    }
+  public static void main(String[] args) {}
 }

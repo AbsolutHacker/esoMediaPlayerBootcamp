@@ -7,16 +7,17 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 
 public class EntertainmentControlClient {
 
   private final WebSocket socket;
   private int requestIndex = 128;
-  private final Map<Integer,BehaviorSubject<ApiResponse>> pendingRequests;
-
+  private final Map<Integer, BehaviorSubject<ApiResponse>> pendingRequests;
 
   public EntertainmentControlClient(WebSocket webSocket) {
     this.socket = webSocket;
@@ -25,16 +26,9 @@ public class EntertainmentControlClient {
 
   public void start() {
     socket.frameHandler(this::responseHandler);
-    newRequest(
-        new ClientRequest(requestIndex++, "getAvailableSources")
-      )
-    .subscribe(response -> {
-      System.out.println("Congratulations, super awesome Rx-i-ness!");
-      System.err.println(Json.encodePrettily(response));
-    });
   }
 
-  public Observable<ApiResponse> newRequest(ClientRequest request) {
+  public Observable<ApiResponse> request(ClientRequest request) {
     // create an Observable
     BehaviorSubject<ApiResponse> responseChannel = BehaviorSubject.create();
 
@@ -48,38 +42,47 @@ public class EntertainmentControlClient {
     return responseChannel.hide();
   }
 
-  private void responseHandler(WebSocketFrame frame) {
+  public Observable<ApiResponse> newRequest(String singleMethodToInvoke, Class<?> expectedReturnType) {
+    return request(new ClientRequest(requestIndex++, singleMethodToInvoke, expectedReturnType));
+  }
 
-    // log, if anybody wants to see our private data
-    System.out.println(frame.isText()
-        ? frame.textData()
-        : "Binary frame, length() = " + frame.binaryData().length());
+  private void responseHandler(@NotNull WebSocketFrame frame) {
 
     try {
 
+      System.out.println(frame.binaryData());
       // jsonify frame -> get ApiResponse object
       ApiResponse response = frame.binaryData().toJsonObject().mapTo(ApiResponse.class);
 
-      // lookup the responseChannel from the /pending/ map
-      BehaviorSubject<ApiResponse> responseChannel = pendingRequests.get(response.id);
+      // lookup the responseChannel from the "pending" map
+      BehaviorSubject<ApiResponse> responseChannel = pendingRequests.get(response.getId());
 
-      // notify its subscribers
-      if (responseChannel != null)
-        responseChannel.onNext(response);
-
-      // if the response was an error or completion, notify its subscribers
-      switch (response.response) {
-        // TODO just do something.. anything.
+      // notify the response's subscribers if the request was successful;
+      // if it was an error or completion, notify its subscribers and discard
+      // the response channel object
+      if (null != responseChannel) {
+        switch (response.getResponseType()) {
+          case ERROR:
+            responseChannel.onError(new RejectedExecutionException(response.getBody().toString()));
+            pendingRequests.remove(response.getId());
+            break;
+          case COMPLETION:
+            responseChannel.onComplete();
+            pendingRequests.remove(response.getId());
+            break;
+          case SUCCESS:
+            responseChannel.onNext(response);
+            break;
+          default:
+        }
       }
 
     } catch (DecodeException | IllegalArgumentException e) {
 
-      System.err.println("Received malformed response from server, discarding.\n>> " +
-              e.getMessage());
-//      e.printStackTrace();
+      System.err.println(
+          "Received malformed response from server, discarding.\n>> " + e.getMessage());
+      //      e.printStackTrace();
 
     }
-
   }
-
 }

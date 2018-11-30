@@ -3,34 +3,21 @@ package de.eso.rxplayer.api;
 import de.eso.rxplayer.Audio;
 import de.eso.rxplayer.Track;
 
-
-/**
- * Provides functionality of a cross source media player
- */
+/** Provides functionality of a cross source media player */
 public interface MediaPlayer {
-  /**
-   * play a track from the beginning
-   */
+  /** play a track from the beginning */
   void play();
 
-  /**
-   * pause a track
-   */
+  /** pause a track */
   void pause();
 
-  /**
-   * pause the track and jump back to the starting point
-   */
+  /** pause the track and jump back to the starting point */
   void stop();
 
-  /**
-   * go to the next track and pause at the beginning
-   */
+  /** go to the next track and pause at the beginning */
   void next();
 
-  /**
-   * go to the previous track and pause at the beginning
-   */
+  /** go to the previous track and pause at the beginning */
   void previous();
 
   /**
@@ -48,8 +35,7 @@ public interface MediaPlayer {
   void selectItem(int itemId);
 
   /**
-   * get the current position within a track
-   * within the station context this time is 0
+   * get the current position within a track within the station context this time is 0
    *
    * @return current offset
    */
