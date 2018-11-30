@@ -1,5 +1,6 @@
 package de.eso.rxplayer.vertx.client;
 
+import de.eso.rxplayer.Audio;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,8 +23,10 @@ class EntertainmentControlClientTest {
 
   @Test
   void requests() {
-    clientInstance.newRequest("/browse/albums")
-        .subscribe(System.out::println);
+    clientInstance.newRequest("/browse/sources", Audio.Connection.class)
+        .subscribe(apiResponse -> {
+          System.out.println(apiResponse.getBody());
+        });
   }
 
   @AfterEach

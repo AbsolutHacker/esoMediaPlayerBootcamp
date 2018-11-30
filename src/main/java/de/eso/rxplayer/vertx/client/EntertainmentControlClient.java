@@ -7,6 +7,8 @@ import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.Json;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.RejectedExecutionException;
@@ -15,7 +17,7 @@ public class EntertainmentControlClient {
 
   private final WebSocket socket;
   private int requestIndex = 128;
-  private final Map<Integer, BehaviorSubject<? extends ApiResponse>> pendingRequests;
+  private final Map<Integer, BehaviorSubject<ApiResponse>> pendingRequests;
 
   public EntertainmentControlClient(WebSocket webSocket) {
     this.socket = webSocket;
@@ -26,9 +28,9 @@ public class EntertainmentControlClient {
     socket.frameHandler(this::responseHandler);
   }
 
-  public <E extends Object> Observable<ApiResponse<E>> request(ClientRequest request) {
+  public Observable<ApiResponse> request(ClientRequest request) {
     // create an Observable
-    BehaviorSubject<ApiResponse<E>> responseChannel = BehaviorSubject.create();
+    BehaviorSubject<ApiResponse> responseChannel = BehaviorSubject.create();
 
     // queue it by its requestId
     pendingRequests.put(request.id, responseChannel);
@@ -40,37 +42,35 @@ public class EntertainmentControlClient {
     return responseChannel.hide();
   }
 
-  public <E> Observable<ApiResponse<E>> newRequest(String singleMethodToInvoke) {
-    return request(new ClientRequest(requestIndex++, singleMethodToInvoke));
+  public Observable<ApiResponse> newRequest(String singleMethodToInvoke, Class<?> expectedReturnType) {
+    return request(new ClientRequest(requestIndex++, singleMethodToInvoke, expectedReturnType));
   }
 
-  // SUPER UNSAFE
-  //@SuppressWarnings("unchecked")
-  private <E> void responseHandler(WebSocketFrame frame) {
+  private void responseHandler(@NotNull WebSocketFrame frame) {
 
     try {
 
       System.out.println(frame.binaryData());
       // jsonify frame -> get ApiResponse object
-      ApiResponse<E> response = frame.binaryData().toJsonObject().mapTo(ApiResponse.class);
+      ApiResponse response = frame.binaryData().toJsonObject().mapTo(ApiResponse.class);
 
       // lookup the responseChannel from the "pending" map
-      BehaviorSubject<? extends ApiResponse> responseChannel = pendingRequests.get(response.id);
+      BehaviorSubject<ApiResponse> responseChannel = pendingRequests.get(response.getId());
 
       // notify the response's subscribers if the request was successful;
       // if it was an error or completion, notify its subscribers and discard
       // the response channel object
       if (null != responseChannel) {
-        switch (response.response) {
-          case "ERROR":
-            responseChannel.onError(new RejectedExecutionException(response.body.toString()));
-            pendingRequests.remove(response.id);
+        switch (response.getResponseType()) {
+          case ERROR:
+            responseChannel.onError(new RejectedExecutionException(response.getBody().toString()));
+            pendingRequests.remove(response.getId());
             break;
-          case "COMPLETION":
+          case COMPLETION:
             responseChannel.onComplete();
-            pendingRequests.remove(response.id);
+            pendingRequests.remove(response.getId());
             break;
-          case "SUCCESS":
+          case SUCCESS:
             responseChannel.onNext(response);
             break;
           default:
