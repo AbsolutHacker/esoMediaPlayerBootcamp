@@ -1,20 +1,22 @@
 package de.eso.rxplayer.ui;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
-import javax.swing.*;
 
 public class MediaPlayerDisplay extends JFrame {
 
   public static void main(String[] args) {
-    MediaPlayerDisplay mediaPlayerDisplay = new MediaPlayerDisplay();
-    mediaPlayerDisplay.setVisible(true);
+    new MediaPlayerDisplay();
   }
+
+  private static MediaPlayerDisplay mediaPlayerDisplay;
 
   private final Font font = new Font("SansSerif", Font.PLAIN, 40);
 
@@ -31,7 +33,11 @@ public class MediaPlayerDisplay extends JFrame {
 
   private final List<PlayerButton> playerButtons = new ArrayList<>();
 
+  @SuppressWarnings("WeakerAccess")
   public MediaPlayerDisplay() {
+    mediaPlayerDisplay = this;
+    mediaPlayerDisplay.setVisible(true);
+
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
     trackTimeLabel = new JLabel(RESET_TIME, SwingConstants.CENTER);
@@ -42,14 +48,15 @@ public class MediaPlayerDisplay extends JFrame {
     trackPanel.add(new createTrackInformationPanel(), BorderLayout.EAST);
 
     JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
-    addPlayerButtons(buttonPanel); // PlayerControl Buttons on the Bottom of the Player
+    addPlayerButtons(buttonPanel); //PlayerControl Buttons on the Bottom of the Player
 
     add(trackPanel, BorderLayout.CENTER);
     add(buttonPanel, BorderLayout.SOUTH);
 
     pack();
 
-    // ToDo implement switchView Button
+    //ToDo implement switchView Button
+    //ToDo implement a way to switch between sources
   }
 
   private void addPlayerButtons(JPanel buttonPanel) {
@@ -65,23 +72,23 @@ public class MediaPlayerDisplay extends JFrame {
 
   private class createTrackInformationPanel extends JPanel {
     createTrackInformationPanel() {
+      super(new BorderLayout());
+
       final JLabel trackTitleLabel;
       final JLabel trackArtistLabel;
       final JLabel trackAlbumLabel;
 
-      JPanel trackInformationPanel = new JPanel(new GridLayout(3, 1));
-
       trackTitleLabel = new JLabel(RESET_TITLE, SwingConstants.CENTER);
       trackTitleLabel.setFont(font.deriveFont(12.0f));
-      trackInformationPanel.add(trackTitleLabel, BorderLayout.NORTH);
+      add(trackTitleLabel, BorderLayout.NORTH);
 
-      trackArtistLabel = new JLabel(RESET_TITLE, SwingConstants.CENTER);
+      trackArtistLabel = new JLabel(RESET_ARTIST, SwingConstants.CENTER);
       trackArtistLabel.setFont(font.deriveFont(12.0f));
-      trackInformationPanel.add(trackTitleLabel, BorderLayout.CENTER);
+      add(trackArtistLabel, BorderLayout.CENTER);
 
-      trackAlbumLabel = new JLabel(RESET_TITLE, SwingConstants.CENTER);
+      trackAlbumLabel = new JLabel(RESET_ALBUM, SwingConstants.CENTER);
       trackAlbumLabel.setFont(font.deriveFont(12.0f));
-      trackInformationPanel.add(trackTitleLabel, BorderLayout.SOUTH);
+      add(trackAlbumLabel, BorderLayout.SOUTH);
     }
   }
 
@@ -96,6 +103,7 @@ public class MediaPlayerDisplay extends JFrame {
     }
   }
 
+  @SuppressWarnings("WeakerAccess")
   public void setTrackTime(String s) {
     trackTimeLabel.setText(s);
   }
@@ -112,6 +120,7 @@ public class MediaPlayerDisplay extends JFrame {
     setTrackTitle(RESET_TITLE);
   }
 
+  @SuppressWarnings("WeakerAccess")
   public void setTrackArtist(String title) {
     ((JLabel) ((JPanel) trackPanel.getComponent(2)).getComponent(1)).setText(title);
   }
@@ -137,7 +146,8 @@ public class MediaPlayerDisplay extends JFrame {
   public void setCoverImage(String path) {
     BufferedImage myPicture = null;
     try {
-      myPicture = ImageIO.read(new File(path));
+      URL url = new URL(path);
+      myPicture = ImageIO.read(url);
     } catch (IOException e) {
       System.out.println("[WARNING] CoverImage not found!");
     }
@@ -158,6 +168,7 @@ public class MediaPlayerDisplay extends JFrame {
     return new ImageIcon(newImage); // transform it back
   }
 
+  @SuppressWarnings("WeakerAccess")
   public ImageIcon getDefaultCover() {
     BufferedImage myPicture = null;
     try {
@@ -174,5 +185,9 @@ public class MediaPlayerDisplay extends JFrame {
     }
 
     return image;
+  }
+
+  public static MediaPlayerDisplay getMediaPlayerDisplay() {
+    return mediaPlayerDisplay;
   }
 }

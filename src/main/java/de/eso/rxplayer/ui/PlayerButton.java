@@ -1,8 +1,8 @@
 package de.eso.rxplayer.ui;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import javax.swing.*;
 
 abstract class PlayerButton extends JButton {
 

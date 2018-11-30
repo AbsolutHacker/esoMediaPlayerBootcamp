@@ -58,7 +58,6 @@ class DisplayAlbumsButton extends PlayerButton {
               if (album != null) {
                 System.out.println("[INFO] Got the album \"" + album.getName() + "\"");
                 MediaPlayerDisplay.getMediaPlayerDisplay().setTrackAlbum(album.getName());
-                MediaPlayerDisplay.getMediaPlayerDisplay().setCoverImage(album.getCoverMedium());
               }
 
             }
@@ -122,7 +121,6 @@ class SearchAlbumButton extends PlayerButton {
               if (album != null) {
                 System.out.println("[INFO] Got the album \"" + album.getName() + "\"");
                 MediaPlayerDisplay.getMediaPlayerDisplay().setTrackAlbum(album.getName());
-                MediaPlayerDisplay.getMediaPlayerDisplay().setCoverImage(album.getCoverMedium());
               }
 
             }
@@ -164,7 +162,7 @@ class SearchTrackButton extends PlayerButton {
     actionListeners[0] =
         e -> {
           System.out.println("SearchTrackButton pressed");
-          String searchedTrack = "Ich und mein Computer"; //ToDo Actually ask the user what track they want to search for
+          String searchedTrack = "Bohemian Rhapsody";
 
           EntertainmentControlClient client = Launcher.getClient().blockingGet();
           Observable<ApiResponse> response$ = client.newRequest("/browse/tracks/" + searchedTrack, Track.class);
@@ -181,7 +179,6 @@ class SearchTrackButton extends PlayerButton {
               if (track != null) {
                 System.out.println("[INFO] Got the track \"" + track.getTitle() + "\"");
                 MediaPlayerDisplay.getMediaPlayerDisplay().setTrackTitle(track.getTitle());
-                MediaPlayerDisplay.getMediaPlayerDisplay().setCoverImage("no cover"); //ToDo Set the cover to the album the track is located in
               }
 
             }
@@ -224,7 +221,7 @@ class AlbumTracksButton extends PlayerButton {
         e -> {
           System.out.println("AlbumTracksButton pressed");
           EntertainmentControlClient client = Launcher.getClient().blockingGet();
-          String album = "A Night at the Opera"; //Bohemian Rhapsody //ToDo actually ask the user what they want to search
+          String album = "A Night at the Opera"; //Bohemian Rhapsody
           System.out.println("Started searching for the tracks of the album \"" + album + "\"");
 
           client.newRequest("/browse/albumTracks/" + album, Track.class).subscribe(apiResponse -> {
@@ -238,7 +235,6 @@ class AlbumTracksButton extends PlayerButton {
               if (track != null) {
                 System.out.println("[INFO] Got the track \"" + track.getTitle() + "\"");
                 MediaPlayerDisplay.getMediaPlayerDisplay().setTrackTitle(track.getTitle());
-                MediaPlayerDisplay.getMediaPlayerDisplay().setCoverImage("no cover"); //ToDo set the cover to the album the user searched for
               }
             }
           });
