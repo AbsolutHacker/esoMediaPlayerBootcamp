@@ -1,13 +1,12 @@
 package de.eso.rxplayer.vertx.client;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import de.eso.rxplayer.Audio;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class EntertainmentControlClientTest {
 
@@ -23,10 +22,12 @@ class EntertainmentControlClientTest {
 
   @Test
   void requests() {
-    clientInstance.newRequest("/browse/sources", Audio.Connection.class)
-        .subscribe(apiResponse -> {
-          System.out.println(apiResponse.getBody());
-        });
+    clientInstance
+        .newRequest("/browse/sources", Audio.Connection.class)
+        .subscribe(
+            apiResponse -> {
+              System.out.println(apiResponse.getBody());
+            });
   }
 
   @AfterEach

@@ -2,7 +2,6 @@ package de.eso.rxplayer.vertx.client;
 
 import io.reactivex.Single;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.Json;
 
 public class Launcher {
 
