@@ -12,6 +12,7 @@ import io.reactivex.subjects.Subject;
 import kotlin.NotImplementedError;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * MediaPlayer with all its buttons and functionality for the user to control the player
@@ -69,13 +70,30 @@ public final class MediaPlayerImpl implements MediaPlayer {
     }
 
     /**
+     * switch to the next track and starts playing automatically
+     */
+    @Override
+    public void next(){
+        System.out.println("press next");
+        playSubject.onNext(ServerEvents.NEXT);
+    }
+
+    /**
+     * switch to the next track and starts playing automatically
+     */
+    @Override
+    public void previous(){
+        System.out.println("press previous");
+        playSubject.onNext(ServerEvents.PREV);
+    }
+
+    /**
      * takes all events that will be invoke from outside
      * filter repeated events
      */
     private void scheduleIncommingEvents(){
         playSubject
             .subscribe(
-
             event -> {
                 System.out.println("Next Event -> " + event.name());
                 switch (event)
@@ -113,7 +131,30 @@ public final class MediaPlayerImpl implements MediaPlayer {
                                     throwable.printStackTrace();
                                 });
                         break;
-
+                    case NEXT:
+                        nextInner()
+                            .subscribe(
+                                () -> {
+                                    System.out.println("next complete");
+                                    System.out.println(" ");
+                                },
+                                throwable -> {
+                                    System.out.println("stop failed");
+                                    throwable.printStackTrace();
+                                });
+                        break;
+                    case PREV:
+                        previousInner()
+                            .subscribe(
+                                () -> {
+                                    System.out.println("next complete");
+                                    System.out.println(" ");
+                                },
+                                throwable -> {
+                                    System.out.println("stop failed");
+                                    throwable.printStackTrace();
+                                });
+                    break;
                     case CHANGESRC:
                         break;
                 }
@@ -128,6 +169,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
      * @return
      */
     private Completable playInner(Integer track) {
+        System.out.println("call playInner");
         EntertainmentService es = myEntertainmentService.getEntertainmentService();
         Completable startsPlaying = Completable.complete();
         if (player == null) {
@@ -148,9 +190,11 @@ public final class MediaPlayerImpl implements MediaPlayer {
                         .flatMapCompletable((verifyPlayState) -> {
                             if (!verifyPlayState) {
                                 System.out.println("not playing -> starts playing track " + track);
-                                return player.select(track)
-                                        .doOnComplete(() -> player.play())
-                                        .doOnComplete(() -> es.getAudio().fadeIn(currentSource));
+                                return
+                                        player.select(track)
+                                        .andThen(player.play())
+                                        .andThen(es.getAudio().fadeIn(currentSource)
+                                        );
                             } else {
                                 System.out.println("is playing -> do nothing");
                                 return Completable.complete();
@@ -170,8 +214,8 @@ public final class MediaPlayerImpl implements MediaPlayer {
      * @return
      */
     private Completable pauseInner() {
-        EntertainmentService es = myEntertainmentService.getEntertainmentService();
         System.out.println("call pauseInner");
+        EntertainmentService es = myEntertainmentService.getEntertainmentService();
         Completable startsPlaying = Completable.complete();
         if (player == null) {
             if (radio == null) {
@@ -196,7 +240,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
                                 if (verifyPlayState) {
                                     System.out.println("is playing -> starts pausing");
                                     return es.getAudio().fadeOut(currentSource)
-                                    .doOnComplete(() -> player.pause());
+                                    .andThen(player.pause());
                                 } else {
                                     System.out.println("not playing -> do nothing");
                                     return Completable.complete();
@@ -246,57 +290,53 @@ public final class MediaPlayerImpl implements MediaPlayer {
         return startsPlaying;
     }
 
-    /**
-     * switch to the next track and starts playing automatically
-     */
-    @Override
-    public void next() {
-        System.out.println("press next");
-        pauseInner()
-            .doOnComplete(
-                () -> player.nowPlaying()
-                    .take(1)
-                    .doOnNext((track) -> System.out.println("next -> current track: " + track))
-                    .flatMapCompletable(trackid -> playInner(trackid + 1))
-            )
-            .subscribe(
-                () -> {
-                    System.out.println("next complete");
-                    System.out.println(" ");
-                },
-                throwable -> {
-                    System.out.println("stop failed");
-                    throwable.printStackTrace();
-                });
-    }
-    /**
-     * switch to the previous track and starts playing automatically
-     */
-    @Override
-    public void previous() {
-        System.out.println("press previous");
-        pauseInner()
-                .doOnComplete(
-                        () -> player.nowPlaying()
+
+    private Completable nextInner() {
+        System.out.println("call nextInner");
+        return player.isPlaying()
+                .take(1)
+                .flatMapCompletable(playing -> {
+                    System.out.println("Playing? -> " + playing);
+                    if(playing) {
+                        return player.nowPlaying()
                                 .take(1)
                                 .flatMapCompletable(trackid -> {
-                                    if(trackid > 0){
-                                        return playInner(trackid + 1);
-                                    } else {
-                                        return Completable.complete();
-                                    }
+                                    System.out.println("Current Play Track -> " + trackid);
+                                    currentTrackId++;
+                                    return pauseInner()
+                                            .andThen(playInner(trackid + 1));
+                                }).andThen(Completable.complete());
+                    } else {
+                        currentTrackId++;
+                        System.out.println("Set new Track -> " + currentTrackId);
+                        return Completable.complete();
+                    }
 
-                                })
-                )
-                .subscribe(
-                        () -> {
-                            System.out.println("previous complete");
-                            System.out.println(" ");
-                        },
-                        throwable -> {
-                            System.out.println("previous failed");
-                            throwable.printStackTrace();
-                        });
+                });
+    }
+
+    private Completable previousInner() {
+        System.out.println("call previousInner");
+        return player.isPlaying()
+            .take(1)
+            .flatMapCompletable(playing -> {
+                System.out.println("Playing? -> " + playing);
+                if(playing) {
+                    return player.nowPlaying()
+                            .take(1)
+                            .flatMapCompletable(trackid -> {
+                                System.out.println("Current Play Track -> " + trackid);
+                                currentTrackId--;
+                                return pauseInner()
+                                        .andThen(playInner(trackid - 1));
+                            }).andThen(Completable.complete());
+                } else {
+                    currentTrackId--;
+                    System.out.println("Set new Track -> " + currentTrackId);
+                    return Completable.complete();
+                }
+
+            });
     }
 
     /**
@@ -306,15 +346,15 @@ public final class MediaPlayerImpl implements MediaPlayer {
      */
     @Override
     public void selectSource(Audio.Connection source) {
+        System.out.println("press selectSource");
         if (currentSource == null) {
             System.out.println("select new source");
             manageSources(source);
         } else if (currentSource != source) {
             System.out.println("switch source");
             stopInner()
-                .doOnComplete(() -> manageSources(source))
-                .doOnError( Throwable::printStackTrace)
                 .subscribe(() -> {
+                        manageSources(source);
                         System.out.println("switch source complete");
                         System.out.println(" ");
                     },
@@ -395,7 +435,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
 
     @Override
     public void selectItem(int itemId) {
-
+       currentTrackId = itemId;
     }
 
     @Override
@@ -418,18 +458,24 @@ public final class MediaPlayerImpl implements MediaPlayer {
             Thread.sleep(ms);
             mp.pause();
             Thread.sleep(ms);
-            mp.play();
-            Thread.sleep(ms);
             mp.next();
             Thread.sleep(ms);
             mp.play();
             Thread.sleep(ms);
-            mp.pause();
+            mp.play();
             Thread.sleep(ms);
-            mp.stop();
+            mp.next();
             Thread.sleep(ms);
-            mp.selectSource(Audio.Connection.USB);
+            mp.previous();
             Thread.sleep(ms);
+//            mp.play();
+//            Thread.sleep(ms);
+//            mp.pause();
+//            Thread.sleep(ms);
+//            mp.stop();
+//            Thread.sleep(ms);
+//            mp.selectSource(Audio.Connection.USB);
+//            Thread.sleep(ms);
 //            mp.selectSource(Audio.Connection.USB);
 //            Thread.sleep(ms);
 //            mp.selectSource(Audio.Connection.USB);
@@ -442,6 +488,6 @@ public final class MediaPlayerImpl implements MediaPlayer {
     }
     
     private enum ServerEvents{
-        PLAY, PAUSE, STOP, CHANGESRC, ;
+        PLAY, PAUSE, STOP, NEXT, PREV, CHANGESRC
     }
 }
