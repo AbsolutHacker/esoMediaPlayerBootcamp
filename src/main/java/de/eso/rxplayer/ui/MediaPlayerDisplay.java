@@ -1,20 +1,21 @@
 package de.eso.rxplayer.ui;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
-import javax.swing.*;
 
 public class MediaPlayerDisplay extends JFrame {
 
   public static void main(String[] args) {
-    MediaPlayerDisplay mediaPlayerDisplay = new MediaPlayerDisplay();
-    mediaPlayerDisplay.setVisible(true);
+    new MediaBrowserDisplay();
   }
+
+  private static MediaPlayerDisplay mediaPlayerDisplay;
 
   private final Font font = new Font("SansSerif", Font.PLAIN, 40);
 
@@ -32,6 +33,9 @@ public class MediaPlayerDisplay extends JFrame {
   private final List<PlayerButton> playerButtons = new ArrayList<>();
 
   public MediaPlayerDisplay() {
+    mediaPlayerDisplay = this;
+    mediaPlayerDisplay.setVisible(true);
+
     setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
     trackTimeLabel = new JLabel(RESET_TIME, SwingConstants.CENTER);
@@ -174,5 +178,9 @@ public class MediaPlayerDisplay extends JFrame {
     }
 
     return image;
+  }
+
+  public static MediaPlayerDisplay getMediaplayerDisplay() {
+    return mediaPlayerDisplay;
   }
 }

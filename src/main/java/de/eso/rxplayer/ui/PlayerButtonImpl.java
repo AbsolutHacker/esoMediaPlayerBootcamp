@@ -1,6 +1,12 @@
 package de.eso.rxplayer.ui;
 
+import de.eso.rxplayer.Album;
+import de.eso.rxplayer.Track;
+import de.eso.rxplayer.api.ApiResponse;
+import de.eso.rxplayer.vertx.client.EntertainmentControlClient;
 import de.eso.rxplayer.vertx.client.Launcher;
+import io.reactivex.Observable;
+
 import java.awt.event.ActionListener;
 import java.util.Random;
 
@@ -35,20 +41,36 @@ class DisplayAlbumsButton extends PlayerButton {
     actionListeners[0] =
         e -> {
           System.out.println("DisplayAlbumsButton pressed");
-          Launcher.getClient()
-              .subscribe(
-                  client -> {
-                    //                Observable<ApiResponse> apiResponse$ =
-                    // client.newRequest("/browse/albums", Album.class);
-                    //                apiResponse$.subscribe(apiResponse -> {
-                    //
-                    //                });
-                  });
+
+          EntertainmentControlClient client = Launcher.getClient().blockingGet();
+          Observable<ApiResponse> response$ = client.newRequest("/browse/albums", Album.class);
+          response$.subscribe(response -> {
+
+            for (Object result : response.getBody()) {
+              Album album = null;
+              try {
+                album = (Album) result;
+              } catch (ClassCastException classCastEx) {
+                System.out.println("[WARNING] ClassCastException when getting album");
+              }
+
+              if (album != null) {
+                System.out.println("[INFO] Got the album \"" + album.getName() + "\"");
+                MediaPlayerDisplay.getMediaplayerDisplay().setTrackAlbum(album.getName());
+              }
+
+            }
+          });
+
         };
     return actionListeners;
   }
 }
 
+/**
+ * Currently mostly the same code as the AllAlbums Button.
+ * This might however change in the future, in regard to the UI.
+ */
 class SearchAlbumButton extends PlayerButton {
 
   private String buttonText;
@@ -80,15 +102,27 @@ class SearchAlbumButton extends PlayerButton {
     actionListeners[0] =
         e -> {
           System.out.println("SearchAlbumButton pressed");
-          Launcher.getClient()
-              .subscribe(
-                  client -> {
-                    //                Observable<ApiResponse> apiResponse$ =
-                    // client.newRequest("/browse/album", albumName);
-                    //                apiResponse$.subscribe(apiResponse -> {
-                    //
-                    //                });
-                  });
+          String searchedAlbum = "A Night at the Opera"; //Bohemian Rhapsody
+
+          EntertainmentControlClient client = Launcher.getClient().blockingGet();
+          Observable<ApiResponse> response$ = client.newRequest("/browse/albums/" + searchedAlbum, Album.class);
+          response$.subscribe(response -> {
+
+            for (Object result : response.getBody()) {
+              Album album = null;
+              try {
+                album = (Album) result;
+              } catch (ClassCastException classCastEx) {
+                System.out.println("[WARNING] ClassCastException when getting album");
+              }
+
+              if (album != null) {
+                System.out.println("[INFO] Got the album \"" + album.getName() + "\"");
+                MediaPlayerDisplay.getMediaplayerDisplay().setTrackAlbum(album.getName());
+              }
+
+            }
+          });
         };
     return actionListeners;
   }
@@ -125,15 +159,27 @@ class SearchTrackButton extends PlayerButton {
     actionListeners[0] =
         e -> {
           System.out.println("SearchTrackButton pressed");
-          Launcher.getClient()
-              .subscribe(
-                  client -> {
-                    //                Observable<ApiResponse> apiResponse$ =
-                    // client.newRequest("/browse/track", trackName);
-                    //                apiResponse$.subscribe(apiResponse -> {
-                    //
-                    //                });
-                  });
+          String searchedTrack = "Bohemian Rhapsody";
+
+          EntertainmentControlClient client = Launcher.getClient().blockingGet();
+          Observable<ApiResponse> response$ = client.newRequest("/browse/tracks/" + searchedTrack, Track.class);
+          response$.subscribe(response -> {
+
+            for (Object result : response.getBody()) {
+              Track track = null;
+              try {
+                track = (Track) result;
+              } catch (ClassCastException classCastEx) {
+                System.out.println("[WARNING] ClassCastException when searching track");
+              }
+
+              if (track != null) {
+                System.out.println("[INFO] Got the track \"" + track.getTitle() + "\"");
+                MediaPlayerDisplay.getMediaplayerDisplay().setTrackTitle(track.getTitle());
+              }
+
+            }
+          });
         };
     return actionListeners;
   }
@@ -170,15 +216,24 @@ class AlbumTracksButton extends PlayerButton {
     actionListeners[0] =
         e -> {
           System.out.println("AlbumTracksButton pressed");
-          Launcher.getClient()
-              .subscribe(
-                  client -> {
-                    //                Observable<ApiResponse> apiResponse$ =
-                    // client.newRequest("/browse/albumTracks", albumName);
-                    //                apiResponse$.subscribe(apiResponse -> {
-                    //
-                    //                });
-                  });
+          EntertainmentControlClient client = Launcher.getClient().blockingGet();
+          String album = "A Night at the Opera"; //Bohemian Rhapsody
+          System.out.println("Started searching for the tracks of the album \"" + album + "\"");
+
+          client.newRequest("/browse/albumTracks/" + album, Track.class).subscribe(apiResponse -> {
+            for (Object response : apiResponse.getBody()) {
+              Track track = null;
+              try {
+                track = (Track)response;
+              } catch (ClassCastException classCastEx) {
+                System.out.println("[WARNING] Failed to cast the current Track");
+              }
+              if (track != null) {
+                System.out.println("[INFO] Got the track \"" + track.getTitle() + "\"");
+                MediaPlayerDisplay.getMediaplayerDisplay().setTrackTitle(track.getTitle());
+              }
+            }
+          });
         };
     return actionListeners;
   }
@@ -202,15 +257,8 @@ class BackButton extends PlayerButton {
     actionListeners[0] =
         e -> {
           System.out.println("BackButton pressed");
-          Launcher.getClient()
-              .subscribe(
-                  client -> {
-                    //                Observable<ApiResponse> apiResponse$ =
-                    // client.newRequest("/play/back");
-                    //                apiResponse$.subscribe(apiResponse -> {
-                    //
-                    //                });
-                  });
+          EntertainmentControlClient client = Launcher.getClient().blockingGet();
+          client.newRequest("/play/back", Void.class).subscribe();
         };
     return actionListeners;
   }
@@ -247,12 +295,8 @@ class StopButton extends PlayerButton {
     actionListeners[0] =
         e -> {
           System.out.println("StopButton pressed");
-          Launcher.getClient()
-              .subscribe(
-                  client -> {
-                    //                Observable<ApiResponse> apiResponse$ =
-                    // client.newRequest("/play/stop");
-                  });
+          EntertainmentControlClient client = Launcher.getClient().blockingGet();
+          client.newRequest("/play/stop", Void.class).subscribe();
         };
     return actionListeners;
   }
@@ -262,18 +306,20 @@ class PlayPauseButton extends PlayerButton {
 
   private boolean isPlayMode = true; // if button press equals to play or pause
   private String buttonText;
+  private Language currentLanguage;
 
   @Override
   void changeLanguage(Language language) {
+    currentLanguage = language;
     switch (language) {
       case English:
-        buttonText = "PLAY";
+        buttonText = isPlayMode ? "PLAY" : "PAUSE";
         break;
       case German:
-        buttonText = "SPIELEN";
+        buttonText = isPlayMode ? "SPIELEN" : "PAUSE";
         break;
       default:
-        buttonText = "PLAY";
+        buttonText = isPlayMode ? "PLAY" : "PAUSE";
     }
     setText(buttonText);
   }
@@ -288,27 +334,19 @@ class PlayPauseButton extends PlayerButton {
     ActionListener[] actionListeners = new ActionListener[1];
     actionListeners[0] =
         e -> {
-          if (isPlayMode) {
+          if (!isPlayMode) {
             System.out.println("PlayButton pressed");
-            isPlayMode = false;
-            buttonText = "PLAY";
-            Launcher.getClient()
-                .subscribe(
-                    client -> {
-                      //                    Observable<ApiResponse> apiResponse$ =
-                      // client.newRequest("/play/play");
-                    });
+            isPlayMode = true;
+            changeLanguage(currentLanguage);
+            EntertainmentControlClient client = Launcher.getClient().blockingGet();
+            client.newRequest("/play/play", Void.class).subscribe();
 
           } else {
             System.out.println("PauseButton pressed");
-            isPlayMode = true;
-            buttonText = "PAUSE";
-            Launcher.getClient()
-                .subscribe(
-                    client -> {
-                      //                    Observable<ApiResponse> apiResponse$ =
-                      // client.newRequest("/play/pause");
-                    });
+            isPlayMode = false;
+            changeLanguage(currentLanguage);
+            EntertainmentControlClient client = Launcher.getClient().blockingGet();
+            client.newRequest("/play/pause", Void.class).subscribe();
           }
         };
     return actionListeners;
@@ -333,12 +371,8 @@ class ForwardButton extends PlayerButton {
     actionListeners[0] =
         e -> {
           System.out.println("ForwardButton pressed");
-          Launcher.getClient()
-              .subscribe(
-                  client -> {
-                    //                Observable<ApiResponse> apiResponse$ =
-                    // client.newRequest("/play/forward");
-                  });
+          EntertainmentControlClient client = Launcher.getClient().blockingGet();
+          client.newRequest("/play/forward", Void.class).subscribe();
         };
     return actionListeners;
   }
