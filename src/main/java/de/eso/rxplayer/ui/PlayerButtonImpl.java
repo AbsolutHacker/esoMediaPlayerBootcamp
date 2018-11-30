@@ -36,7 +36,7 @@ class DisplayAlbumsButton extends  PlayerButton {
         actionListeners[0] = e -> {
             System.out.println("DisplayAlbumsButton pressed");
             Launcher.getClient().subscribe(client -> {
-//                Observable<ApiResponse> apiResponse$ = client.newRequest("/browse/albums");
+//                Observable<ApiResponse> apiResponse$ = client.newRequest("/browse/albums", Album.class);
 //                apiResponse$.subscribe(apiResponse -> {
 //
 //                });

@@ -27,15 +27,11 @@ public class MediaPlayerDisplay extends JFrame {
 
     private JLabel trackCover = new JLabel(getDefaultCover());
 
-    private JPanel trackPanel = new JPanel(new GridLayout(1,2));
+    private final JPanel trackPanel = new JPanel(new GridLayout(1,2));
 
-    private List<PlayerButton> playerButtons = new ArrayList<>();
+    private final List<PlayerButton> playerButtons = new ArrayList<>();
 
 
-
-    /**
-     * Initialisiert das Media-Display.
-     */
     public MediaPlayerDisplay() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
@@ -141,7 +137,7 @@ public class MediaPlayerDisplay extends JFrame {
         try {
             myPicture = ImageIO.read(new File(path));
         } catch (IOException e) {
-
+            System.out.println("[WARNING] CoverImage not found!");
         }
 
         ImageIcon image;
@@ -151,8 +147,7 @@ public class MediaPlayerDisplay extends JFrame {
             image = new ImageIcon(myPicture);
         }
 
-        JLabel trackCover = new JLabel(resizeImage(image));
-        this.trackCover = trackCover;
+        this.trackCover = new JLabel(resizeImage(image));
     }
 
     private ImageIcon resizeImage(ImageIcon imageIcon) {
@@ -166,7 +161,7 @@ public class MediaPlayerDisplay extends JFrame {
         try {
             myPicture = ImageIO.read(new File("src/main/resources/defaultCover.png"));
         } catch (IOException e) {
-
+            System.out.println("[WARNING] Default CoverImage not found!");
         }
 
         ImageIcon image;

@@ -14,8 +14,8 @@ import java.util.stream.Collectors;
  */
 public final class MediaBrowserImpl implements MediaBrowser {
 
-    private EntertainmentService es;
-    private static MediaBrowserImpl mediaBrowser = new MediaBrowserImpl();
+    private final EntertainmentService es;
+    private final static MediaBrowserImpl mediaBrowser = new MediaBrowserImpl();
 
     private MediaBrowserImpl() {
         this.es = myEntertainmentService.getEntertainmentService();
@@ -58,6 +58,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
         Observable<List<Album>> albums$ = getAlbumsFromTracks(tracks$);
 
         //filter from all albums the ones that have the same name as the one searched for
+        @SuppressWarnings("UnnecessaryLocalVariable")
         Observable<List<Album>> searchedAlbums$ = albums$
                 .map(albums -> albums.stream()
                         .filter(album -> album.getName().equals(name))
@@ -72,6 +73,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
         Observable<List<Track>> tracks$ = getAllTracksInScope(searchScope);
 
         //filter from all titles the ones that have the same name as the one searched for
+        @SuppressWarnings("UnnecessaryLocalVariable")
         Observable<List<Track>> searchedTracks$ = tracks$
                 .map(tracks -> tracks.stream()
                         .filter(track -> track.getTitle().equals(name))
@@ -86,6 +88,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
         Observable<List<Track>> tracks$ = getAllTracksInScope(getGlobalSearchScope());
 
         //filter from all tracks the ones that have the same albumId as the album searched for
+        @SuppressWarnings("UnnecessaryLocalVariable")
         Observable<List<Track>> albumTracks$ = tracks$.map(tracks -> tracks.stream()
                 .filter(track -> track.getAlbumId() == album.getId())
                 .collect(Collectors.toList())
@@ -96,7 +99,7 @@ public final class MediaBrowserImpl implements MediaBrowser {
 
     @Override
     public Observable<List<Station>> getStations() {
-        Observable<List<Station>> stationList = null;
+        Observable<List<Station>> stationList;
         try {
             Radio radio = es.getFm();
             stationList = radio.list();
@@ -163,14 +166,14 @@ public final class MediaBrowserImpl implements MediaBrowser {
                 );
 
         //map each Integer to it's album
+        @SuppressWarnings("UnnecessaryLocalVariable")
         Observable<List<Album>> gottenAlbums = albumIds$.flatMapSingle(albumIds -> { //flatMapSINGLE
             List<Single<Album>> singleList = albumIds.stream()
                     .map(id -> es.getBrowser().albumById(id)) //get the Single<Album>
                     .collect(Collectors.toList());
             return Single.zip(singleList, array -> { //zip that Single<Album> back to Album
                 Album[] albumArray = Arrays.stream(array).toArray(Album[]::new);
-                List<Album> albums = Arrays.asList(albumArray);
-                return albums;
+                return Arrays.asList(albumArray);
             });
         });
 

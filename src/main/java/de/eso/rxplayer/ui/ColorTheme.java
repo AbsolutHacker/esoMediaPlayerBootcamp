@@ -12,11 +12,12 @@ public enum ColorTheme {
     LIGHT(0xE0E0E0),
     DARK(0x404040);
 
-    private int hexCode;
+    private final int hexCode;
     ColorTheme(int hexCode) {
         this.hexCode = hexCode;
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static ColorTheme getDefaultColorTheme() {
         return ESO;
     }

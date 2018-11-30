@@ -70,6 +70,7 @@ class MediaBrowserImplTest {
 
     @Test
     void getStations() throws InterruptedException {
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         List<Station> knownStations = new ArrayList<>(); //radio was never built in, we don't know a single station to test
         MediaBrowserImpl mediaBrowser = MediaBrowserImpl.getInstance();
 
