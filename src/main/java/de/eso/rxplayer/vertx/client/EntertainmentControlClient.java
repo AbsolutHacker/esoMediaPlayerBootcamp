@@ -50,7 +50,6 @@ public class EntertainmentControlClient {
 
     try {
 
-      System.out.println(frame.binaryData());
       // jsonify frame -> get ApiResponse object
       ApiResponse response = frame.binaryData().toJsonObject().mapTo(ApiResponse.class);
 

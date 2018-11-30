@@ -3,12 +3,7 @@ package de.eso.rxplayer.api;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.vertx.core.json.Json;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.TypeVariable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class ApiResponse<E> {
@@ -53,6 +48,7 @@ public class ApiResponse<E> {
 
   /**
    * Safer constructor
+   *
    * @param reference
    * @param responseType
    * @param body

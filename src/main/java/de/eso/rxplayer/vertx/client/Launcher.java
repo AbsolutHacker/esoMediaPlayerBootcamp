@@ -2,7 +2,7 @@ package de.eso.rxplayer.vertx.client;
 
 import io.reactivex.Single;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.Json;
+import io.vertx.core.http.HttpClientOptions;
 
 public class Launcher {
 
@@ -10,7 +10,7 @@ public class Launcher {
     return Single.create(
         emitter ->
             Vertx.vertx()
-                .createHttpClient()
+                .createHttpClient(new HttpClientOptions().setMaxWebsocketFrameSize(1_048_576))
                 .websocket(
                     8091,
                     "localhost",

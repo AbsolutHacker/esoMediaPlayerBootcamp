@@ -1,11 +1,13 @@
 package de.eso.rxplayer.vertx.client;
 
+import de.eso.rxplayer.Album;
 import de.eso.rxplayer.Audio;
-import org.junit.jupiter.api.AfterEach;
+import io.reactivex.observers.TestObserver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,23 +18,31 @@ class EntertainmentControlClientTest {
   @BeforeEach
   void setUp() {
     clientInstance = Launcher.getClient().blockingGet();
-    log("Created client");
     clientInstance.start();
-    log("Started client");
   }
 
   @Test
-  void requests() {
+  void requestSources() {
+    TestObserver<List> testObserver =
     clientInstance.newRequest("/browse/sources", Audio.Connection.class)
-        .subscribe(apiResponse -> {
-          System.out.println(apiResponse.getBody());
-        });
+        .map(apiResponse -> apiResponse.getBody())
+        .test();
+
+    waitFor(1_000);
+    testObserver.assertValue(l -> l.contains("CD") && l.contains("USB"));
   }
 
-  @AfterEach
-  void tearDown() {
+  @Test
+  void tryToPlay() {
+    clientInstance.newRequest("/browse/albums", Album.class)
+        .map(res -> res.getBody())
+        .subscribe(System.out::println);
+    waitFor(2000);
+  }
+
+  void waitFor(long n) {
     try {
-      Thread.sleep(3_000);
+      Thread.sleep(n);
     } catch (InterruptedException e) {
 
     }
