@@ -172,7 +172,7 @@ public final class MediaPlayerImpl implements MediaPlayer {
                           System.out.println("not playing -> starts playing track " + track);
                           return player
                               .select(track)
-                              .andThen(player.play())
+                              .andThen(Completable.defer(() -> player.play()))
                               .andThen(es.getAudio().fadeIn(currentSource));
                         } else {
                           System.out.println("is playing -> do nothing");
