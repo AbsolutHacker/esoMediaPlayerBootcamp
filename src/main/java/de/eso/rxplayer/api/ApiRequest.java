@@ -27,6 +27,8 @@ public class ApiRequest<E> {
   public String request;
 
   public String target;
+
+  public Class<E> expectedReturnType;
   /** */
   public Map<String, Object> params;
 

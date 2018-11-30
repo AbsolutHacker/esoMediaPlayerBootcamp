@@ -3,6 +3,12 @@ package de.eso.rxplayer.api;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.vertx.core.json.Json;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ApiResponse<E> {
@@ -14,42 +20,75 @@ public class ApiResponse<E> {
    * <p>If the ApiResponse object is not caused by a client ApiRequest (i.e., represents a server
    * request or notification), it is guaranteed to not correspond to any previous client request.
    */
-  public final int id;
-  /** The response <b>type</b>. */
-  public final String response;
+  private final int id;
 
-  public final List<E> body;
+  /** The response <b>type</b>. */
+  private final Type responseType;
+
+  private final Class<E> typeToken;
+
+  private final List<E> body;
 
   /**
-   * Unsafe constructor accepting a given ID (request reference).
+   * Unsafe constructor accepting any given request reference ID.
    *
    * @param id
    * @param responseType
    * @param body
+   * @param contentType
    * @throws IllegalArgumentException
    */
   @JsonIgnore
-  ApiResponse(int id, Type responseType, List<E> body) {
+  ApiResponse(int id, Type responseType, List<E> body, Class<E> contentType) {
     if (responseType == null)
       throw new IllegalArgumentException(
           "ApiResponse(): responseType required, given: " + responseType);
 
     this.id = id;
-    this.response = responseType.toString();
+    this.responseType = responseType;
     this.body = body;
+
+    this.typeToken = contentType;
   }
 
+  /**
+   * Safer constructor
+   * @param reference
+   * @param responseType
+   * @param body
+   */
   @JsonIgnore
   public ApiResponse(ApiRequest reference, Type responseType, List<E> body) {
-    this(reference.id, responseType, body);
+    this(reference.id, responseType, body, reference.expectedReturnType);
   }
 
   @JsonCreator
   public ApiResponse(
       @JsonProperty("id") int id,
       @JsonProperty("response") String responseType,
-      @JsonProperty("body") List<E> params) {
-    this(id, Type.valueOf(responseType), params);
+      @JsonProperty("body") List<E> body,
+      @JsonProperty("content-type") Class<E> contentType) {
+    this(id, Type.valueOf(responseType), body, contentType);
+  }
+
+  @JsonProperty("id")
+  public int getId() {
+    return id;
+  }
+
+  @JsonProperty("response")
+  public Type getResponseType() {
+    return responseType;
+  }
+
+  @JsonProperty("body")
+  public List<E> getBody() {
+    return body;
+  }
+
+  @JsonProperty("content-type")
+  public Class<E> getTypeToken() {
+    return typeToken;
   }
 
   public enum Type {

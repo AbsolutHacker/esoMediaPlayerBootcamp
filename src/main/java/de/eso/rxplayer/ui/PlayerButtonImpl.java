@@ -21,7 +21,8 @@ class BackButton extends PlayerButton {
           Launcher.getClient()
               .subscribe(
                   client -> {
-                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/back");
+                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/back",
+                        Void.class);
                   });
         };
     return actionListeners;
@@ -44,7 +45,7 @@ class StopButton extends PlayerButton {
           Launcher.getClient()
               .subscribe(
                   client -> {
-                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/stop");
+                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/stop", Void.class);
                   });
         };
     return actionListeners;
@@ -67,7 +68,7 @@ class PlayButton extends PlayerButton {
           Launcher.getClient()
               .subscribe(
                   client -> {
-                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/play");
+                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/play", Void.class);
                   });
         };
     return actionListeners;
@@ -90,7 +91,7 @@ class PauseButton extends PlayerButton {
           Launcher.getClient()
               .subscribe(
                   client -> {
-                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/pause");
+                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/pause", Void.class);
                   });
         };
     return actionListeners;
@@ -113,7 +114,7 @@ class ForwardButton extends PlayerButton {
           Launcher.getClient()
               .subscribe(
                   client -> {
-                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/forward");
+                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/forward", Void.class);
                   });
         };
     return actionListeners;
