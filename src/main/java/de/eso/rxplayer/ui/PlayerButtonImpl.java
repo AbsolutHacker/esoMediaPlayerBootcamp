@@ -1,13 +1,16 @@
 package de.eso.rxplayer.ui;
 
-import de.eso.rxplayer.api.ApiResponse;
 import de.eso.rxplayer.vertx.client.Launcher;
-import io.reactivex.Observable;
 
 import java.awt.event.ActionListener;
 
 
 class BackButton extends PlayerButton {
+
+    @Override
+    void changeLanguage(Language language) {
+        //This button does not change with different languages
+    }
 
     @Override
     public String getText() {
@@ -20,10 +23,10 @@ class BackButton extends PlayerButton {
         actionListeners[0] = e -> {
             System.out.println("BackButton pressed");
             Launcher.getClient().subscribe(client -> {
-                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/back");
-                apiResponse$.subscribe(apiResponse -> {
-
-                });
+//                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/back");
+//                apiResponse$.subscribe(apiResponse -> {
+//
+//                });
             });
         };
         return actionListeners;
@@ -33,9 +36,26 @@ class BackButton extends PlayerButton {
 
 class StopButton extends PlayerButton {
 
+    private String buttonText;
+
+    @Override
+    void changeLanguage(Language language) {
+        switch (language) {
+            case English:
+                buttonText = "STOP";
+                break;
+            case German:
+                buttonText = "STOP";
+                break;
+            default:
+                buttonText = "STOP";
+                break;
+        }
+    }
+
     @Override
     public String getText() {
-        return "STOP";
+        return  buttonText;
     }
 
     @Override
@@ -44,7 +64,7 @@ class StopButton extends PlayerButton {
         actionListeners[0] = e -> {
             System.out.println("StopButton pressed");
             Launcher.getClient().subscribe(client -> {
-                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/stop");
+//                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/stop");
             });
         };
         return actionListeners;
@@ -55,7 +75,21 @@ class StopButton extends PlayerButton {
 class PlayPauseButton extends PlayerButton {
 
     private boolean isPlayMode = true; //if button press equals to play or pause
-    private String buttonText = "PLAY";
+    private String buttonText;
+
+    @Override
+    void changeLanguage(Language language) {
+        switch (language) {
+            case English:
+                buttonText = "PLAY";
+                break;
+            case German:
+                buttonText = "SPIELEN";
+                break;
+            default:
+                buttonText = "PLAY";
+        }
+    }
 
     @Override
     public String getText() {
@@ -72,7 +106,7 @@ class PlayPauseButton extends PlayerButton {
                 isPlayMode = false;
                 buttonText = "PLAY";
                 Launcher.getClient().subscribe(client -> {
-                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/play");
+//                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/play");
                 });
 
             } else {
@@ -80,7 +114,7 @@ class PlayPauseButton extends PlayerButton {
                 isPlayMode = true;
                 buttonText = "PAUSE";
                 Launcher.getClient().subscribe(client -> {
-                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/pause");
+//                    Observable<ApiResponse> apiResponse$ = client.newRequest("/play/pause");
                 });
             }
         };
@@ -90,6 +124,11 @@ class PlayPauseButton extends PlayerButton {
 
 
 class ForwardButton extends PlayerButton {
+
+    @Override
+    void changeLanguage(Language language) {
+        //this button does not change with different languages
+    }
 
     @Override
     public String getText() {
@@ -102,7 +141,7 @@ class ForwardButton extends PlayerButton {
         actionListeners[0] = e -> {
             System.out.println("ForwardButton pressed");
             Launcher.getClient().subscribe(client -> {
-                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/forward");
+//                Observable<ApiResponse> apiResponse$ = client.newRequest("/play/forward");
             });
         };
         return actionListeners;

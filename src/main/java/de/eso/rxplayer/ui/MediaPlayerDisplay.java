@@ -44,8 +44,8 @@ public class MediaPlayerDisplay extends JFrame {
         trackTimeLabel.setFont(font);
         add(trackTimeLabel, BorderLayout.NORTH);
 
-        trackPanel.add(trackCover);
-        trackPanel.add(new createTrackInformationPanel()); //right hand side with the track information
+        trackPanel.add(trackCover, BorderLayout.WEST);
+        trackPanel.add(new createTrackInformationPanel(), BorderLayout.EAST);
 
         JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
         addPlayerButtons(buttonPanel); //PlayerControl Buttons on the Bottom of the Player
@@ -80,15 +80,15 @@ public class MediaPlayerDisplay extends JFrame {
 
             trackTitleLabel = new JLabel(RESET_TITLE, SwingConstants.CENTER);
             trackTitleLabel.setFont(font.deriveFont(12.0f));
-            trackInformationPanel.add(trackTitleLabel);
+            trackInformationPanel.add(trackTitleLabel, BorderLayout.NORTH);
 
             trackArtistLabel = new JLabel(RESET_TITLE, SwingConstants.CENTER);
             trackArtistLabel.setFont(font.deriveFont(12.0f));
-            trackInformationPanel.add(trackTitleLabel);
+            trackInformationPanel.add(trackTitleLabel, BorderLayout.CENTER);
 
             trackAlbumLabel = new JLabel(RESET_TITLE, SwingConstants.CENTER);
             trackAlbumLabel.setFont(font.deriveFont(12.0f));
-            trackInformationPanel.add(trackTitleLabel);
+            trackInformationPanel.add(trackTitleLabel, BorderLayout.SOUTH);
         }
     }
 
@@ -151,20 +151,27 @@ public class MediaPlayerDisplay extends JFrame {
             image = new ImageIcon(myPicture);
         }
 
-        trackCover = new JLabel(image);
+        JLabel trackCover = new JLabel(resizeImage(image));
+        this.trackCover = trackCover;
+    }
+
+    private ImageIcon resizeImage(ImageIcon imageIcon) {
+        Image image = imageIcon.getImage(); //transform it
+        Image newImage = image.getScaledInstance(10, 10,  java.awt.Image.SCALE_SMOOTH); //scale it
+        return new ImageIcon(newImage);  //transform it back
     }
 
     public ImageIcon getDefaultCover() {
         BufferedImage myPicture = null;
         try {
-            myPicture = ImageIO.read(new File("https://s.discogs.com/images/default-release-cd.png"));
+            myPicture = ImageIO.read(new File("src/main/resources/defaultCover.png"));
         } catch (IOException e) {
 
         }
 
         ImageIcon image;
         if (myPicture == null) {
-            image = getDefaultCover();
+            return null; //this really shouldn't happen
         } else {
             image = new ImageIcon(myPicture);
         }
