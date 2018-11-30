@@ -17,6 +17,10 @@ public enum ColorTheme {
         this.hexCode = hexCode;
     }
 
+    public static ColorTheme getDefaultColorTheme() {
+        return ESO;
+    }
+
     public int getHexCode() {
         return hexCode;
     }
