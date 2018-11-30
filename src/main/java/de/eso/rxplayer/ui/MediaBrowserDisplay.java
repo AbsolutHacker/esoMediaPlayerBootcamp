@@ -1,22 +1,21 @@
 package de.eso.rxplayer.ui;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
 
 public class MediaBrowserDisplay extends JFrame {
 
-  Font font = new Font("SansSerif", Font.PLAIN, 40);
-
   private static MediaBrowserDisplay mediaBrowserDisplay;
 
-  List<PlayerButton> buttons = new ArrayList<>();
+  private final List<PlayerButton> buttons = new ArrayList<>();
 
   public static void main(String[] args) {
     new MediaBrowserDisplay();
   }
 
+  @SuppressWarnings("WeakerAccess")
   public MediaBrowserDisplay() {
     mediaBrowserDisplay = this;
     mediaBrowserDisplay.setVisible(true);

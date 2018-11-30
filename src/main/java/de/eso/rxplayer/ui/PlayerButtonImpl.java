@@ -14,6 +14,7 @@ class DisplayAlbumsButton extends PlayerButton {
 
   private String buttonText;
 
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   void changeLanguage(Language language) {
     switch (language) {
@@ -56,7 +57,7 @@ class DisplayAlbumsButton extends PlayerButton {
 
               if (album != null) {
                 System.out.println("[INFO] Got the album \"" + album.getName() + "\"");
-                MediaPlayerDisplay.getMediaplayerDisplay().setTrackAlbum(album.getName());
+                MediaPlayerDisplay.getMediaPlayerDisplay().setTrackAlbum(album.getName());
               }
 
             }
@@ -75,6 +76,7 @@ class SearchAlbumButton extends PlayerButton {
 
   private String buttonText;
 
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   void changeLanguage(Language language) {
     switch (language) {
@@ -118,7 +120,7 @@ class SearchAlbumButton extends PlayerButton {
 
               if (album != null) {
                 System.out.println("[INFO] Got the album \"" + album.getName() + "\"");
-                MediaPlayerDisplay.getMediaplayerDisplay().setTrackAlbum(album.getName());
+                MediaPlayerDisplay.getMediaPlayerDisplay().setTrackAlbum(album.getName());
               }
 
             }
@@ -132,6 +134,7 @@ class SearchTrackButton extends PlayerButton {
 
   private String buttonText;
 
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   void changeLanguage(Language language) {
     switch (language) {
@@ -175,7 +178,7 @@ class SearchTrackButton extends PlayerButton {
 
               if (track != null) {
                 System.out.println("[INFO] Got the track \"" + track.getTitle() + "\"");
-                MediaPlayerDisplay.getMediaplayerDisplay().setTrackTitle(track.getTitle());
+                MediaPlayerDisplay.getMediaPlayerDisplay().setTrackTitle(track.getTitle());
               }
 
             }
@@ -189,6 +192,7 @@ class AlbumTracksButton extends PlayerButton {
 
   private String buttonText;
 
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   void changeLanguage(Language language) {
     switch (language) {
@@ -230,7 +234,7 @@ class AlbumTracksButton extends PlayerButton {
               }
               if (track != null) {
                 System.out.println("[INFO] Got the track \"" + track.getTitle() + "\"");
-                MediaPlayerDisplay.getMediaplayerDisplay().setTrackTitle(track.getTitle());
+                MediaPlayerDisplay.getMediaPlayerDisplay().setTrackTitle(track.getTitle());
               }
             }
           });
@@ -308,6 +312,7 @@ class PlayPauseButton extends PlayerButton {
   private String buttonText;
   private Language currentLanguage;
 
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   void changeLanguage(Language language) {
     currentLanguage = language;
@@ -382,6 +387,7 @@ class SwitchLanguageButton extends PlayerButton {
 
   private String buttonText;
 
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   void changeLanguage(Language language) {
     switch (language) {
@@ -425,6 +431,7 @@ class SwitchColorButton extends PlayerButton {
 
   private String buttonText;
 
+  @SuppressWarnings("SpellCheckingInspection")
   @Override
   void changeLanguage(Language language) {
     switch (language) {

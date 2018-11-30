@@ -12,7 +12,7 @@ import java.util.List;
 public class MediaPlayerDisplay extends JFrame {
 
   public static void main(String[] args) {
-    new MediaBrowserDisplay();
+    new MediaPlayerDisplay();
   }
 
   private static MediaPlayerDisplay mediaPlayerDisplay;
@@ -32,6 +32,7 @@ public class MediaPlayerDisplay extends JFrame {
 
   private final List<PlayerButton> playerButtons = new ArrayList<>();
 
+  @SuppressWarnings("WeakerAccess")
   public MediaPlayerDisplay() {
     mediaPlayerDisplay = this;
     mediaPlayerDisplay.setVisible(true);
@@ -46,14 +47,15 @@ public class MediaPlayerDisplay extends JFrame {
     trackPanel.add(new createTrackInformationPanel(), BorderLayout.EAST);
 
     JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
-    addPlayerButtons(buttonPanel); // PlayerControl Buttons on the Bottom of the Player
+    addPlayerButtons(buttonPanel); //PlayerControl Buttons on the Bottom of the Player
 
     add(trackPanel, BorderLayout.CENTER);
     add(buttonPanel, BorderLayout.SOUTH);
 
     pack();
 
-    // ToDo implement switchView Button
+    //ToDo implement switchView Button
+    //ToDo implement a way to switch between sources
   }
 
   private void addPlayerButtons(JPanel buttonPanel) {
@@ -100,6 +102,7 @@ public class MediaPlayerDisplay extends JFrame {
     }
   }
 
+  @SuppressWarnings("WeakerAccess")
   public void setTrackTime(String s) {
     trackTimeLabel.setText(s);
   }
@@ -116,6 +119,7 @@ public class MediaPlayerDisplay extends JFrame {
     setTrackTitle(RESET_TITLE);
   }
 
+  @SuppressWarnings("WeakerAccess")
   public void setTrackArtist(String title) {
     ((JLabel) ((JPanel) trackPanel.getComponent(2)).getComponent(1)).setText(title);
   }
@@ -162,6 +166,7 @@ public class MediaPlayerDisplay extends JFrame {
     return new ImageIcon(newImage); // transform it back
   }
 
+  @SuppressWarnings("WeakerAccess")
   public ImageIcon getDefaultCover() {
     BufferedImage myPicture = null;
     try {
@@ -180,7 +185,7 @@ public class MediaPlayerDisplay extends JFrame {
     return image;
   }
 
-  public static MediaPlayerDisplay getMediaplayerDisplay() {
+  public static MediaPlayerDisplay getMediaPlayerDisplay() {
     return mediaPlayerDisplay;
   }
 }

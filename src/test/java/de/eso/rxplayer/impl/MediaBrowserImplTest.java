@@ -1,16 +1,18 @@
 package de.eso.rxplayer.impl;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import de.eso.rxplayer.Album;
 import de.eso.rxplayer.Audio;
 import de.eso.rxplayer.Station;
 import de.eso.rxplayer.Track;
 import io.reactivex.observers.TestObserver;
-import java.util.ArrayList;
-import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MediaBrowserImplTest {
 
@@ -47,6 +49,7 @@ class MediaBrowserImplTest {
     TestObserver<List<Album>> albums$ = mediaBrowser.searchAlbum("Fetty Wap").test();
     Thread.sleep(2000);
     albums$.assertValueAt(0, albums -> albums.get(0).equals(getAvailableAlbums().get(0)));
+    albums$.assertValueAt(1, Objects::isNull);
   }
 
   @Test
