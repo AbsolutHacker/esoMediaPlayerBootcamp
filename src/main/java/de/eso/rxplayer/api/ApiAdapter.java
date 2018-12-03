@@ -70,6 +70,7 @@ public final class ApiAdapter {
 
       case "/browse/mock":
         return browser.searchAlbum("Fetty Wap");
+
       case "/browse/sources":
         BehaviorSubject<List<Audio.Connection>> mockSubject = BehaviorSubject.create();
         mockSubject.onNext(browser.getAvailableSources());
