@@ -10,7 +10,7 @@ public class Launcher {
     return Single.create(
         emitter ->
             Vertx.vertx()
-                .createHttpClient(new HttpClientOptions().setMaxWebsocketFrameSize(1_048_576))
+                .createHttpClient()
                 .websocket(
                     8091,
                     "localhost",

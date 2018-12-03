@@ -31,7 +31,6 @@ public class EntertainmentControlServer {
     vertx
         .createHttpServer(new HttpServerOptions()
             .setLogActivity(true)
-            .setMaxWebsocketFrameSize(1_048_576)
         )
         .requestHandler(this::httpRequestHandler)
         .websocketHandler(this::webSocketHandler)
