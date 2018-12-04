@@ -1,5 +1,6 @@
 package de.eso.rxplayer.vertx.client;
 
+import de.eso.rxplayer.api.ApiRequest;
 import de.eso.rxplayer.api.ApiResponse;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
@@ -31,12 +32,12 @@ public class EntertainmentControlClient {
     socket.frameHandler(this::responseHandler);
   }
 
-  public Observable<ApiResponse> request(ClientRequest request) {
+  public Observable<ApiResponse> request(ApiRequest request) {
     // create an Observable
     BehaviorSubject<ApiResponse> responseChannel = BehaviorSubject.create();
 
     // queue it by its requestId
-    pendingRequests.put(request.id, responseChannel);
+    pendingRequests.put(request.getId(), responseChannel);
 
     // send the request
     socket.writeFinalTextFrame(Json.encodePrettily(request));
@@ -47,7 +48,7 @@ public class EntertainmentControlClient {
 
   public Observable<ApiResponse> newRequest(
       String singleMethodToInvoke, Class<?> expectedReturnType) {
-    return request(new ClientRequest(requestIndex++, singleMethodToInvoke, expectedReturnType));
+    return request(new ApiRequest(requestIndex++, singleMethodToInvoke, expectedReturnType));
   }
 
   private void responseHandler(@NotNull WebSocketFrame frame) {

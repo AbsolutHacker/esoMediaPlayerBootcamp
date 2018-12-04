@@ -54,7 +54,7 @@ public class ApiResponse<E> {
    */
   @JsonIgnore
   public ApiResponse(ApiRequest reference, Type responseType, List<E> body) {
-    this(reference.id, responseType, body, reference.expectedReturnType);
+    this(reference.getId(), responseType, body, reference.getExpectedReturnType());
   }
 
   @JsonCreator
