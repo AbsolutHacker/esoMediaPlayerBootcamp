@@ -3,6 +3,8 @@ package de.eso.rxplayer.vertx.client;
 import de.eso.rxplayer.api.ApiResponse;
 import io.reactivex.Observable;
 import io.reactivex.subjects.BehaviorSubject;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.buffer.impl.BufferImpl;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.DecodeException;
@@ -17,10 +19,12 @@ public class EntertainmentControlClient {
   private final WebSocket socket;
   private int requestIndex = 128;
   private final Map<Integer, BehaviorSubject<ApiResponse>> pendingRequests;
+  private Buffer inputBuffer;
 
   public EntertainmentControlClient(WebSocket webSocket) {
     this.socket = webSocket;
     this.pendingRequests = new HashMap<>();
+    this.inputBuffer = new BufferImpl();
   }
 
   public void start() {
@@ -48,10 +52,17 @@ public class EntertainmentControlClient {
 
   private void responseHandler(@NotNull WebSocketFrame frame) {
 
-    try {
+    // append the frame to its non-final predecessors
+    inputBuffer.appendBuffer(frame.binaryData());
+    // if the frame will have a successors, wait for it and exit here
+    if (!frame.isFinal()) return;
 
+    try {
       // jsonify frame -> get ApiResponse object
-      ApiResponse response = frame.binaryData().toJsonObject().mapTo(ApiResponse.class);
+      ApiResponse response = inputBuffer.toJsonObject().mapTo(ApiResponse.class);
+
+      // jsonification succeeded, clear the buffer
+      inputBuffer = new BufferImpl();
 
       // lookup the responseChannel from the "pending" map
       BehaviorSubject<ApiResponse> responseChannel = pendingRequests.get(response.getId());
@@ -81,6 +92,9 @@ public class EntertainmentControlClient {
       System.err.println(
           "Received malformed response from server, discarding.\n>> " + e.getMessage());
       //      e.printStackTrace();
+
+      // discard the input buffer
+      inputBuffer = new BufferImpl();
 
     }
   }
